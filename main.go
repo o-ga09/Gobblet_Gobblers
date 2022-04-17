@@ -5,11 +5,25 @@ import "fmt"
 const ROW_NUM = 3
 const COLUMN_NUM = 3
 
+type pos struct {
+	x int
+	y int
+}
+
 func main() {
 	var board [][]int
 
 	board = make([][]int, ROW_NUM)
 	Init_Board(&board)
+	for {
+		InputPlayer1(&board)
+		PrintBoard(&board)
+		InputPlayer2(&board)
+		PrintBoard(&board)
+		if (Is_win(&board)) {
+			break
+		}
+	}
 	PrintBoard(&board)
 
 }
@@ -67,4 +81,29 @@ func Is_win(board *[][]int) bool{
 		return true
 	}
 	return false
+}
+
+func InputPlayer1(board *[][]int) {
+	var P1 pos
+
+	fmt.Scanf("Player 1 (x y): %d %d",&P1.x,&P1.y)
+	if (Is_empty(board,P1.x,P1.y)) {
+		(*board)[P1.x][P1.y] = 1
+	}
+}
+
+func InputPlayer2(board *[][]int) {
+	var P2 pos
+
+	fmt.Scanf("Player 2 (x y) : %d %d",&P2.x,&P2.y)
+	if (Is_empty(board,P2.x,P2.y)) {
+		(*board)[P2.x][P2.y] = 2
+	}
+}
+
+func Is_empty(board *[][]int,x int,y int) bool {
+	if ((*board)[x][y] != 0) {
+		return false
+	}
+	return true
 }
