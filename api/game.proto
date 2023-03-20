@@ -11,7 +11,18 @@ package game;
 // サービスの定義
 service GreetingService {
 	// サービスが持つメソッドの定義
+
+	//unary
 	rpc Hello (HelloRequest) returns (HelloResponse); 
+
+	//server stream
+	rpc HelloServerStream(HelloRequest) returns (stream HelloResponse);
+
+	//client stream
+	rpc HelloClientStream(stream HelloRequest) returns (HelloResponse);
+
+	//Bistream
+	rpc HelloBiStream(stream HelloRequest) returns (stream HelloResponse);
 }
 
 // 型の定義
