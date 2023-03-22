@@ -9,9 +9,12 @@ import (
 	"log"
 	hellopb "main/pkg/grpc"
 	"os"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 var (
@@ -20,6 +23,8 @@ var (
 )
 
 func main() {
+	cancel := make(chan struct{})
+
 	fmt.Println("start gRPC Client")
 
 	scanner = *bufio.NewScanner(os.Stdin)
@@ -45,7 +50,8 @@ func main() {
 		fmt.Println("2: HelloServerStream")
 		fmt.Println("3: HelloClientStream")
 		fmt.Println("4: HelloBiStream")
-		fmt.Println("5: exit")
+		fmt.Println("5: Chat")
+		fmt.Println("6: exit")
 		fmt.Print("please enter -> ")
 
 		scanner.Scan()
@@ -61,11 +67,16 @@ func main() {
 		case "4":
 			HelloBiStream()
 		case "5":
+			go GetMessage(cancel)
+
+			CreateMessage()
+		case "6":
 			fmt.Println("Bye")
 			goto M
 		}
 	}
 M:
+close(cancel)
 }
 
 func Hello() {
@@ -183,6 +194,75 @@ func HelloBiStream() {
 				rcvEnd= true
 			} else {
 				fmt.Println(res.GetMessage())
+			}
+		}
+	}
+}
+
+func CreateMessage() {
+	fmt.Printf("Please enter your name -> ")
+	scanner.Scan()
+	name := scanner.Text()
+
+	timestamp := timestamppb.New(time.Now())
+
+	req_msg := &hellopb.MessageRequest{
+		Name: name,
+		Message: "",
+		CreatedAt: timestamp,
+	}
+
+	_, err := client.CreateMessage(context.Background(),req_msg)
+	if err != nil {
+		return
+	} else {
+		fmt.Println("you are joined room")
+	}
+
+	for {
+		scanner.Scan()
+		msg := scanner.Text()
+
+		if msg == "/q" {
+			return
+		}
+
+		timestamp := timestamppb.New(time.Now())
+
+		req_msg := &hellopb.MessageRequest{
+			Name: name,
+			Message: msg,
+			CreatedAt: timestamp,
+		}
+
+		_, err := client.CreateMessage(context.Background(),req_msg)
+		if err != nil {
+			return
+		}
+	}
+}
+
+func GetMessage(ch chan struct{}) {
+	stream, err := client.GetMessages(context.Background(),&emptypb.Empty{})
+	if err != nil {
+		return
+	}
+
+	for {
+		select {
+		case <- ch:
+			return
+		default:
+			res, err := stream.Recv()
+			if errors.Is(err,io.EOF) {
+				break
+			}
+	
+			if err != nil {
+				return
+			}
+			if res.Message != "" {
+				fmt.Printf("[%s] : %s (%s)\n",res.Name,res.Message,res.CreatedAt)
 			}
 		}
 	}

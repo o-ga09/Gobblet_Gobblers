@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -30,6 +31,9 @@ type GreetingServiceClient interface {
 	HelloClientStream(ctx context.Context, opts ...grpc.CallOption) (GreetingService_HelloClientStreamClient, error)
 	//Bistream
 	HelloBiStream(ctx context.Context, opts ...grpc.CallOption) (GreetingService_HelloBiStreamClient, error)
+	//chat
+	CreateMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error)
+	GetMessages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (GreetingService_GetMessagesClient, error)
 }
 
 type greetingServiceClient struct {
@@ -146,6 +150,47 @@ func (x *greetingServiceHelloBiStreamClient) Recv() (*HelloResponse, error) {
 	return m, nil
 }
 
+func (c *greetingServiceClient) CreateMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error) {
+	out := new(MessageResponse)
+	err := c.cc.Invoke(ctx, "/game.GreetingService/CreateMessage", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *greetingServiceClient) GetMessages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (GreetingService_GetMessagesClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GreetingService_ServiceDesc.Streams[3], "/game.GreetingService/GetMessages", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &greetingServiceGetMessagesClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type GreetingService_GetMessagesClient interface {
+	Recv() (*MessageResponse, error)
+	grpc.ClientStream
+}
+
+type greetingServiceGetMessagesClient struct {
+	grpc.ClientStream
+}
+
+func (x *greetingServiceGetMessagesClient) Recv() (*MessageResponse, error) {
+	m := new(MessageResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GreetingServiceServer is the server API for GreetingService service.
 // All implementations must embed UnimplementedGreetingServiceServer
 // for forward compatibility
@@ -158,6 +203,9 @@ type GreetingServiceServer interface {
 	HelloClientStream(GreetingService_HelloClientStreamServer) error
 	//Bistream
 	HelloBiStream(GreetingService_HelloBiStreamServer) error
+	//chat
+	CreateMessage(context.Context, *MessageRequest) (*MessageResponse, error)
+	GetMessages(*emptypb.Empty, GreetingService_GetMessagesServer) error
 	mustEmbedUnimplementedGreetingServiceServer()
 }
 
@@ -176,6 +224,12 @@ func (UnimplementedGreetingServiceServer) HelloClientStream(GreetingService_Hell
 }
 func (UnimplementedGreetingServiceServer) HelloBiStream(GreetingService_HelloBiStreamServer) error {
 	return status.Errorf(codes.Unimplemented, "method HelloBiStream not implemented")
+}
+func (UnimplementedGreetingServiceServer) CreateMessage(context.Context, *MessageRequest) (*MessageResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateMessage not implemented")
+}
+func (UnimplementedGreetingServiceServer) GetMessages(*emptypb.Empty, GreetingService_GetMessagesServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
 }
 func (UnimplementedGreetingServiceServer) mustEmbedUnimplementedGreetingServiceServer() {}
 
@@ -281,6 +335,45 @@ func (x *greetingServiceHelloBiStreamServer) Recv() (*HelloRequest, error) {
 	return m, nil
 }
 
+func _GreetingService_CreateMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MessageRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GreetingServiceServer).CreateMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/game.GreetingService/CreateMessage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GreetingServiceServer).CreateMessage(ctx, req.(*MessageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GreetingService_GetMessages_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(GreetingServiceServer).GetMessages(m, &greetingServiceGetMessagesServer{stream})
+}
+
+type GreetingService_GetMessagesServer interface {
+	Send(*MessageResponse) error
+	grpc.ServerStream
+}
+
+type greetingServiceGetMessagesServer struct {
+	grpc.ServerStream
+}
+
+func (x *greetingServiceGetMessagesServer) Send(m *MessageResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // GreetingService_ServiceDesc is the grpc.ServiceDesc for GreetingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -291,6 +384,10 @@ var GreetingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Hello",
 			Handler:    _GreetingService_Hello_Handler,
+		},
+		{
+			MethodName: "CreateMessage",
+			Handler:    _GreetingService_CreateMessage_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
@@ -309,6 +406,11 @@ var GreetingService_ServiceDesc = grpc.ServiceDesc{
 			Handler:       _GreetingService_HelloBiStream_Handler,
 			ServerStreams: true,
 			ClientStreams: true,
+		},
+		{
+			StreamName:    "GetMessages",
+			Handler:       _GreetingService_GetMessages_Handler,
+			ServerStreams: true,
 		},
 	},
 	Metadata: "game.proto",

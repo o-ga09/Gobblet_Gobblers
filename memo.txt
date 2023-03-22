@@ -1,0 +1,13 @@
+gRPCコードの自動生成
+protoc --go_out=../pkg/grpc --go_opt=paths=source_relative --go-grpc_out=../pkg/grpc --go-grpc_opt=paths=source_relative game.proto 
+
+gRPCurl
+
+サービスの取得
+grpcurl -plaintext localhost:8080 list
+
+サービスのメソッド一覧取得
+grpcurl -plaintext localhost:8080 list [サービス名]
+
+サービスのメソッドにメッセージを渡す
+grpcurl -plaintext -d '{"[protoファイル定義した型]": "protoファイル定義した型の値"}' localhost:8080 [サービス名].[メソッド名]
