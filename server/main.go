@@ -13,12 +13,14 @@ import (
 
 	hellopb "main/pkg/grpc"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
 type sampleServer struct {
 	hellopb.UnimplementedGreetingServiceServer
+	requests []*hellopb.MessageRequest
 }
 
 func main() {
@@ -101,6 +103,45 @@ func (s *sampleServer) HelloBiStream(stream hellopb.GreetingService_HelloBiStrea
 		});err != nil {
 			return err
 		}
+	}
+}
+
+func (s *sampleServer)CreateMessage(ctx context.Context,r *hellopb.MessageRequest) (*hellopb.MessageResponse,error) {
+	log.Printf("Received %v",r.GetMessage())
+	newR := &hellopb.MessageRequest{
+		Name: r.GetName(),
+		Message: r.GetMessage(),
+		CreatedAt: r.GetCreatedAt(),
+	}
+	s.requests = append(s.requests,newR)
+	return &hellopb.MessageResponse{Message:r.GetMessage()},nil
+}
+
+func (s *sampleServer) GetMessages(_ *empty.Empty,stream hellopb.GreetingService_GetMessagesServer) error {
+	for _, r := range s.requests {
+		if err := stream.Send(&hellopb.MessageResponse{
+			Message: r.GetMessage(),
+		});err != nil {
+			return err
+		}
+	}
+
+	previousCount := len(s.requests)
+
+	for {
+		currentCount := len(s.requests)
+		if previousCount < currentCount {
+			r := s.requests[currentCount - 1]
+			log.Printf("Sent: %v",r.GetMessage())
+			if err := stream.Send(&hellopb.MessageResponse{
+				Name: r.GetName(),
+				Message: r.GetMessage(),
+				CreatedAt: r.GetCreatedAt(),
+			});err != nil {
+				return err
+			}
+		}
+		previousCount = currentCount
 	}
 }
 
