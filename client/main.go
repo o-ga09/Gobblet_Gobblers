@@ -3,12 +3,17 @@ package main
 import (
 	"bufio"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	hellopb "main/pkg/grpc"
+	"net/http"
 	"os"
+	"os/signal"
+	"text/template"
 	"time"
 
 	"google.golang.org/grpc"
@@ -17,9 +22,16 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+type Data struct {
+	Name string
+	Message string
+	CreatedAt string
+}
+
 var (
 	scanner bufio.Scanner
 	client hellopb.GreetingServiceClient
+	list []Data
 )
 
 func main() {
@@ -52,7 +64,8 @@ func main() {
 		fmt.Println("4: HelloBiStream")
 		fmt.Println("5: Chat")
 		fmt.Println("6: Chat")
-		fmt.Println("7: exit")
+		fmt.Println("7: Chat from Browser")
+		fmt.Println("8: exit")
 		fmt.Print("please enter -> ")
 
 		scanner.Scan()
@@ -79,6 +92,8 @@ func main() {
 			name := scanner.Text()
 			Chat(name)
 		case "7":
+			Serve()
+		case "8":
 			fmt.Println("Bye")
 			goto M
 		}
@@ -321,6 +336,7 @@ func receive(ch chan<- *hellopb.MessageResponse,stream hellopb.GreetingService_C
 	for {
 		in, err := stream.Recv()
 		if err == io.EOF {
+			log.Println("ok")
 			close(ch)
 			return
 		}
@@ -342,4 +358,116 @@ func input(ch chan<- *hellopb.MessageRequest,r io.Reader,name string) {
 		}
 		ch<- &input
 	}
+}
+
+func inputFromBrowser(ch chan<- *hellopb.MessageRequest,r *http.Request,name string) {
+	s := r.FormValue("message")
+
+	input := hellopb.MessageRequest{
+		Name: name,
+		Message: s,
+		CreatedAt: timestamppb.Now(),
+	}
+	ch<- &input
+
+}
+
+func Serve() {
+	port := "3000"
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/",Index)
+	mux.HandleFunc("/chat",ChatHandler)
+	
+	go func() {
+		log.Printf("Started Server: port : %v\n",port)
+		http.ListenAndServe(fmt.Sprintf(":%s",port),mux)	
+	}()
+
+	quit := make(chan os.Signal,1)
+	signal.Notify(quit,os.Interrupt)
+	<- quit
+	log.Printf("Stopping Web Server")
+}
+
+func ChatHandler(w http.ResponseWriter,r *http.Request) {
+	if r.Method != "POST" {
+		return
+	}
+	
+	//ブラウザから入力されたデータ
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	defer r.Body.Close()
+
+	res := &Data{}
+	err = json.Unmarshal(body, res)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	name := res.Name
+	data := &Data{
+		Name: name,
+		Message: res.Message,
+		CreatedAt: res.CreatedAt,
+	}
+
+	list = append(list,*data)
+	//gRPC通信部分ここから
+	stream, err := client.Chat(context.Background())
+	if err != nil {
+		log.Println(err)
+	}
+
+	inputCh := make(chan *hellopb.MessageRequest)
+	go inputFromBrowser(inputCh,r,name)
+
+	rcvCh := make(chan *hellopb.MessageResponse)
+	go receive(rcvCh,stream)
+
+	ctx,cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	for {
+		select {
+		case <- ctx.Done():
+			fmt.Println("Done")
+			stream.CloseSend()
+			return
+		case v := <-rcvCh:
+			if (*v).GetMessage() == "" {
+				continue
+			}
+
+			data = &Data{
+				Name: (*v).GetName(),
+				Message: (*v).GetMessage(),
+				CreatedAt: (*v).CreatedAt.String(),
+			}
+			list = append(list, *data)
+		case v := <- inputCh:
+			if (*v).GetMessage() == "\\q" {
+				return
+			}
+			if err := stream.Send(&hellopb.MessageRequest{
+				Name: name,
+				Message: (*v).GetMessage(),
+				CreatedAt: timestamppb.Now(),
+			}); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+	//gRPC通信部分ここまで
+}
+
+func Index(w http.ResponseWriter,r *http.Request) {
+	tmpl := template.Must(template.ParseFiles("../template/chat.html"))
+	tmpl.Execute(w,list)
 }
