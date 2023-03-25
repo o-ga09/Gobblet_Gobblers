@@ -165,6 +165,7 @@ func (s *sampleServer) Chat(stream hellopb.GreetingService_ChatServer) error {
 			});err != nil {
 				return err
 			}
+
 		}
 	}
 }
