@@ -30,6 +30,9 @@ service GreetingService {
 	//chat
 	rpc CreateMessage(MessageRequest) returns (MessageResponse);
 	rpc GetMessages(google.protobuf.Empty) returns (stream MessageResponse);
+
+	//Bidirectional Chat
+	rpc Chat(stream MessageRequest) returns (stream MessageResponse);
 }
 
 // 型の定義

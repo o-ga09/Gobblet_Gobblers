@@ -51,7 +51,8 @@ func main() {
 		fmt.Println("3: HelloClientStream")
 		fmt.Println("4: HelloBiStream")
 		fmt.Println("5: Chat")
-		fmt.Println("6: exit")
+		fmt.Println("6: Chat")
+		fmt.Println("7: exit")
 		fmt.Print("please enter -> ")
 
 		scanner.Scan()
@@ -67,10 +68,17 @@ func main() {
 		case "4":
 			HelloBiStream()
 		case "5":
+			fmt.Println("チャットからexitするには\\qを入力")
 			go GetMessage(cancel)
 
 			CreateMessage()
 		case "6":
+			fmt.Println("チャットからexitするには\\qを入力")
+			fmt.Printf("please enter your name ->")
+			scanner.Scan()
+			name := scanner.Text()
+			Chat(name)
+		case "7":
 			fmt.Println("Bye")
 			goto M
 		}
@@ -223,7 +231,7 @@ func CreateMessage() {
 		scanner.Scan()
 		msg := scanner.Text()
 
-		if msg == "/q" {
+		if msg == "\\q" {
 			return
 		}
 
@@ -265,5 +273,73 @@ func GetMessage(ch chan struct{}) {
 				fmt.Printf("[%s] : %s (%s)\n",res.Name,res.Message,res.CreatedAt)
 			}
 		}
+	}
+}
+
+func Chat(name string) {
+	stream, err := client.Chat(context.Background())
+	if err != nil {
+		log.Println(err)
+	}
+
+	inputch := make(chan *hellopb.MessageRequest)
+	go input(inputch,os.Stdin,name)
+
+	rcvCh := make(chan *hellopb.MessageResponse)
+	go receive(rcvCh,stream)
+
+	ctx,cancel := context.WithCancel(context.TODO())
+	defer cancel()
+
+	for {
+		select {
+		case <- ctx.Done():
+			fmt.Println("Done")
+			stream.CloseSend()
+			return
+		case v := <-rcvCh:
+			if (*v).GetMessage() == "" {
+				continue
+			}
+			fmt.Printf(">[%s] : %s \n",(*v).Name,(*v).Message)
+		case v:= <-inputch:
+			if (*v).GetMessage() == "\\q" {
+				return
+			}
+			if err := stream.Send(&hellopb.MessageRequest{
+				Name: (*v).GetName(),
+				Message: (*v).GetMessage(),
+				CreatedAt: (*v).GetCreatedAt(),
+			}); err != nil {
+				log.Fatal(err)
+			}
+		}
+	}
+}
+
+func receive(ch chan<- *hellopb.MessageResponse,stream hellopb.GreetingService_ChatClient) {
+	for {
+		in, err := stream.Recv()
+		if err == io.EOF {
+			close(ch)
+			return
+		}
+
+		if err != nil {
+			log.Fatal(err)
+		}
+		ch<- in
+	}
+}
+
+func input(ch chan<- *hellopb.MessageRequest,r io.Reader,name string) {
+	s := bufio.NewScanner(r)
+	for s.Scan() {
+		input := hellopb.MessageRequest{
+			Name: name,
+			Message: s.Text(),
+			CreatedAt: timestamppb.Now(),
+		}
+		ch<- &input
 	}
 }

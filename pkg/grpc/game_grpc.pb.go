@@ -34,6 +34,8 @@ type GreetingServiceClient interface {
 	//chat
 	CreateMessage(ctx context.Context, in *MessageRequest, opts ...grpc.CallOption) (*MessageResponse, error)
 	GetMessages(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (GreetingService_GetMessagesClient, error)
+	//Bidirectional Chat
+	Chat(ctx context.Context, opts ...grpc.CallOption) (GreetingService_ChatClient, error)
 }
 
 type greetingServiceClient struct {
@@ -191,6 +193,37 @@ func (x *greetingServiceGetMessagesClient) Recv() (*MessageResponse, error) {
 	return m, nil
 }
 
+func (c *greetingServiceClient) Chat(ctx context.Context, opts ...grpc.CallOption) (GreetingService_ChatClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GreetingService_ServiceDesc.Streams[4], "/game.GreetingService/Chat", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &greetingServiceChatClient{stream}
+	return x, nil
+}
+
+type GreetingService_ChatClient interface {
+	Send(*MessageRequest) error
+	Recv() (*MessageResponse, error)
+	grpc.ClientStream
+}
+
+type greetingServiceChatClient struct {
+	grpc.ClientStream
+}
+
+func (x *greetingServiceChatClient) Send(m *MessageRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *greetingServiceChatClient) Recv() (*MessageResponse, error) {
+	m := new(MessageResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GreetingServiceServer is the server API for GreetingService service.
 // All implementations must embed UnimplementedGreetingServiceServer
 // for forward compatibility
@@ -206,6 +239,8 @@ type GreetingServiceServer interface {
 	//chat
 	CreateMessage(context.Context, *MessageRequest) (*MessageResponse, error)
 	GetMessages(*emptypb.Empty, GreetingService_GetMessagesServer) error
+	//Bidirectional Chat
+	Chat(GreetingService_ChatServer) error
 	mustEmbedUnimplementedGreetingServiceServer()
 }
 
@@ -230,6 +265,9 @@ func (UnimplementedGreetingServiceServer) CreateMessage(context.Context, *Messag
 }
 func (UnimplementedGreetingServiceServer) GetMessages(*emptypb.Empty, GreetingService_GetMessagesServer) error {
 	return status.Errorf(codes.Unimplemented, "method GetMessages not implemented")
+}
+func (UnimplementedGreetingServiceServer) Chat(GreetingService_ChatServer) error {
+	return status.Errorf(codes.Unimplemented, "method Chat not implemented")
 }
 func (UnimplementedGreetingServiceServer) mustEmbedUnimplementedGreetingServiceServer() {}
 
@@ -374,6 +412,32 @@ func (x *greetingServiceGetMessagesServer) Send(m *MessageResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _GreetingService_Chat_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(GreetingServiceServer).Chat(&greetingServiceChatServer{stream})
+}
+
+type GreetingService_ChatServer interface {
+	Send(*MessageResponse) error
+	Recv() (*MessageRequest, error)
+	grpc.ServerStream
+}
+
+type greetingServiceChatServer struct {
+	grpc.ServerStream
+}
+
+func (x *greetingServiceChatServer) Send(m *MessageResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *greetingServiceChatServer) Recv() (*MessageRequest, error) {
+	m := new(MessageRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // GreetingService_ServiceDesc is the grpc.ServiceDesc for GreetingService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -411,6 +475,12 @@ var GreetingService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "GetMessages",
 			Handler:       _GreetingService_GetMessages_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "Chat",
+			Handler:       _GreetingService_Chat_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "game.proto",

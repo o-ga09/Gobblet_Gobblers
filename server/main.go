@@ -145,6 +145,69 @@ func (s *sampleServer) GetMessages(_ *empty.Empty,stream hellopb.GreetingService
 	}
 }
 
+func (s *sampleServer) Chat(stream hellopb.GreetingService_ChatServer) error {
+	rcvCh := make(chan *hellopb.MessageRequest)
+	go s.receive(rcvCh,stream)
+
+	replyCh := make(chan *hellopb.MessageRequest)
+	go s.reply(replyCh,stream)
+
+	for {
+		select {
+		case v :=<- rcvCh:
+			log.Printf("Received: [message]%v, [user]%v",v.GetMessage(),v.GetName())
+		case v :=<- replyCh:
+			log.Printf("Sent : [message]%v, [user]%v",v.GetMessage(),v.GetName())
+			if err := stream.Send(&hellopb.MessageResponse{
+				Name: v.GetName(),
+				Message: v.GetMessage(),
+				CreatedAt: v.GetCreatedAt(),
+			});err != nil {
+				return err
+			}
+		}
+	}
+}
+
 func NewMyServer() *sampleServer {
 	return &sampleServer{}
+}
+
+func (s *sampleServer)receive(ch chan<- *hellopb.MessageRequest,stream hellopb.GreetingService_ChatServer) {
+	for {
+		in, err := stream.Recv()
+		if err  == io.EOF {
+			continue
+		}
+		newR := &hellopb.MessageRequest{
+			Name: in.GetName(),
+			Message: in.GetMessage(),
+			CreatedAt: in.GetCreatedAt(),
+		}
+		s.requests = append(s.requests,newR)
+		ch <- newR
+	}
+}
+
+func (s *sampleServer)reply(ch chan<- *hellopb.MessageRequest,stream hellopb.GreetingService_ChatServer) {
+	for _, r := range s.requests {
+		if err := stream.Send(&hellopb.MessageResponse{
+			Name: r.GetName(),
+			Message: r.GetMessage(),
+			CreatedAt: r.GetCreatedAt(),
+		});err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	previousCount := len(s.requests)
+
+	for {
+		currentCount := len(s.requests)
+		if previousCount < currentCount {
+			r := s.requests[currentCount - 1]
+			ch <- r
+		}
+		previousCount = currentCount
+	}
 }
