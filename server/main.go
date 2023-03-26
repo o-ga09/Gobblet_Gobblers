@@ -14,6 +14,8 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
+var count int
+
 type TicTocToeGameServer struct {
 	tictactoepb.UnimplementedGameServiceServer
 	requests []*tictactoepb.GameRequest
@@ -46,6 +48,7 @@ func main() {
 
 func (s *TicTocToeGameServer) TicTacToeGame(stream tictactoepb.GameService_TicTacToeGameServer) error {
 	rcvCh := make(chan *tictactoepb.GameRequest)
+
 	go s.receive(rcvCh,stream)
 
 	replyCh := make(chan *tictactoepb.GameRequest)
@@ -66,9 +69,11 @@ func NewGameServer() *TicTocToeGameServer {
 }
 
 func (s *TicTocToeGameServer)receive(ch chan<- *tictactoepb.GameRequest,stream tictactoepb.GameService_TicTacToeGameServer) {
+	count = 0
 	for {
 		in, err := stream.Recv()
 		if err  == io.EOF {
+			count++
 			continue
 		}
 		newR := &tictactoepb.GameRequest{
@@ -87,12 +92,15 @@ func (s *TicTocToeGameServer)reply(ch chan<- *tictactoepb.GameRequest,stream tic
 		if s.requests != nil && len(s.requests) != 0 {
 			res := s.requests[0]
 
-			if err := stream.Send(&tictactoepb.GameResponse{
-				PlayerName: res.GetPlayerName(),
-				X: res.GetX(),
-				Y: res.GetY(),
-			});err != nil {
-				log.Fatal(err)
+			if count == 2 {
+				err := stream.Send(&tictactoepb.GameResponse{
+					PlayerName: res.GetPlayerName(),
+					X: res.GetX(),
+					Y: res.GetY(),
+				})
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 
 			if len(s.requests) >= 2 {

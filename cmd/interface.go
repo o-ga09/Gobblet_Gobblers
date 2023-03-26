@@ -10,9 +10,10 @@ const (
 
 
 type Pos struct {
-	attack int
-	x int
-	y int
+	Attack int
+	X int
+	Y int
+	order bool
 }
 
 // type Square struct {
@@ -21,7 +22,6 @@ type Pos struct {
 // }
 
 type Player interface {
-	SetTurn(int)
 	PrintBoard(*[][]int)
 	Row_check(*[][]int) bool
 	Column_check(*[][]int) bool
