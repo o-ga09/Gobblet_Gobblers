@@ -21,7 +21,6 @@ type Pos struct {
 // }
 
 type Player interface {
-	Init_Board(*[][]int)
 	SetTurn(int)
 	PrintBoard(*[][]int)
 	Row_check(*[][]int) bool

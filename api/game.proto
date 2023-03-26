@@ -1,0 +1,30 @@
+// protoのバージョンの宣言
+syntax = "proto3";
+
+// protoファイルから自動生成させるGoのコードの置き先
+// (詳細は4章にて)
+option go_package = "pkg/grpc";
+
+// packageの宣言
+package game;
+
+// サービスの定義
+service GameService {
+	// サービスが持つメソッドの定義
+
+	//Bidirectional Chat
+	rpc TicTacToeGame(stream GameRequest) returns (stream GameResponse);
+}
+
+// 型の定義
+message GameRequest {
+	string playerName = 1;
+	int32 x = 2;
+	int32 y = 3;
+}
+
+message GameResponse {
+	string playerName = 1;
+	int32 x = 2;
+	int32 y = 3;
+}
