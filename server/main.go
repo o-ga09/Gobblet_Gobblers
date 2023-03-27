@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -10,6 +12,7 @@ import (
 
 	tictactoepb "main/pkg/grpc"
 
+	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -19,6 +22,11 @@ var count int
 type TicTocToeGameServer struct {
 	tictactoepb.UnimplementedGameServiceServer
 	requests []*tictactoepb.GameRequest
+	rooms []room
+}
+
+type room struct {
+	room_id string
 }
 
 func main() {
@@ -112,4 +120,56 @@ func (s *TicTocToeGameServer)reply(ch chan<- *tictactoepb.GameRequest,stream tic
 			}
 		}
 	}
+}
+
+func (s *TicTocToeGameServer) Greet(ctx context.Context,r *tictactoepb.GreetRequest) (*tictactoepb.GreetResponse,error) {
+	log.Printf("Request from %s",r.GetMsg())
+	return &tictactoepb.GreetResponse{Msg: fmt.Sprintf("Hello %s!",r.GetMsg())},nil
+}
+
+func (s *TicTocToeGameServer) AddRoom(ctx context.Context,r *tictactoepb.RoomRequest) (*tictactoepb.RoomInfo,error) {
+	log.Printf("Add Room Request")
+
+	s.rooms = append(s.rooms,room{room_id: r.GetRoomId()})
+	index, err := searchRoom(s.rooms,r.RoomId)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	room := s.rooms[index]
+	return &tictactoepb.RoomInfo{RoomId: room.room_id},nil
+}
+
+func (s *TicTocToeGameServer) GetRoomInfo(ctx context.Context,r *tictactoepb.RoomRequest) (*tictactoepb.RoomInfo,error) {
+	log.Printf("Get Room request")
+
+	index, err := searchRoom(s.rooms,r.RoomId)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	room := s.rooms[index]
+	return &tictactoepb.RoomInfo{RoomId: room.room_id},nil
+}
+
+func (s *TicTocToeGameServer) GetRooms(ctx context.Context,_ *empty.Empty) (*tictactoepb.RoomList,error) {
+	log.Printf("Get Rooms request")
+	return &tictactoepb.RoomList{Room: buildRoomInfo(s.rooms)},nil
+}
+
+func buildRoomInfo(room []room) ([]*tictactoepb.RoomInfo){
+	r := make([]*tictactoepb.RoomInfo,0)
+	for _, v := range(room) {
+		r = append(r,&tictactoepb.RoomInfo{RoomId: v.room_id})
+	}
+	return r
+}
+
+func searchRoom(r []room,room_id string) (int,error) {
+	for i, v := range(r) {
+		if v.room_id == room_id {
+			return i,nil
+		}
+	}
+	return -1,errors.New("not found")
 }

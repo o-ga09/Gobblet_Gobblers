@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -22,6 +23,11 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GameServiceClient interface {
+	// サービスが持つメソッドの定義
+	Greetserver(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error)
+	AddRoom(ctx context.Context, in *RoomRequest, opts ...grpc.CallOption) (*RoomInfo, error)
+	GetRoomInfo(ctx context.Context, in *RoomRequest, opts ...grpc.CallOption) (*RoomInfo, error)
+	GetRooms(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomList, error)
 	//Bidirectional Chat
 	TicTacToeGame(ctx context.Context, opts ...grpc.CallOption) (GameService_TicTacToeGameClient, error)
 }
@@ -32,6 +38,42 @@ type gameServiceClient struct {
 
 func NewGameServiceClient(cc grpc.ClientConnInterface) GameServiceClient {
 	return &gameServiceClient{cc}
+}
+
+func (c *gameServiceClient) Greetserver(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error) {
+	out := new(GreetResponse)
+	err := c.cc.Invoke(ctx, "/game.GameService/Greetserver", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) AddRoom(ctx context.Context, in *RoomRequest, opts ...grpc.CallOption) (*RoomInfo, error) {
+	out := new(RoomInfo)
+	err := c.cc.Invoke(ctx, "/game.GameService/AddRoom", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) GetRoomInfo(ctx context.Context, in *RoomRequest, opts ...grpc.CallOption) (*RoomInfo, error) {
+	out := new(RoomInfo)
+	err := c.cc.Invoke(ctx, "/game.GameService/GetRoomInfo", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *gameServiceClient) GetRooms(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomList, error) {
+	out := new(RoomList)
+	err := c.cc.Invoke(ctx, "/game.GameService/GetRooms", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *gameServiceClient) TicTacToeGame(ctx context.Context, opts ...grpc.CallOption) (GameService_TicTacToeGameClient, error) {
@@ -69,6 +111,11 @@ func (x *gameServiceTicTacToeGameClient) Recv() (*GameResponse, error) {
 // All implementations must embed UnimplementedGameServiceServer
 // for forward compatibility
 type GameServiceServer interface {
+	// サービスが持つメソッドの定義
+	Greetserver(context.Context, *GreetRequest) (*GreetResponse, error)
+	AddRoom(context.Context, *RoomRequest) (*RoomInfo, error)
+	GetRoomInfo(context.Context, *RoomRequest) (*RoomInfo, error)
+	GetRooms(context.Context, *emptypb.Empty) (*RoomList, error)
 	//Bidirectional Chat
 	TicTacToeGame(GameService_TicTacToeGameServer) error
 	mustEmbedUnimplementedGameServiceServer()
@@ -78,6 +125,18 @@ type GameServiceServer interface {
 type UnimplementedGameServiceServer struct {
 }
 
+func (UnimplementedGameServiceServer) Greetserver(context.Context, *GreetRequest) (*GreetResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Greetserver not implemented")
+}
+func (UnimplementedGameServiceServer) AddRoom(context.Context, *RoomRequest) (*RoomInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddRoom not implemented")
+}
+func (UnimplementedGameServiceServer) GetRoomInfo(context.Context, *RoomRequest) (*RoomInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRoomInfo not implemented")
+}
+func (UnimplementedGameServiceServer) GetRooms(context.Context, *emptypb.Empty) (*RoomList, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRooms not implemented")
+}
 func (UnimplementedGameServiceServer) TicTacToeGame(GameService_TicTacToeGameServer) error {
 	return status.Errorf(codes.Unimplemented, "method TicTacToeGame not implemented")
 }
@@ -92,6 +151,78 @@ type UnsafeGameServiceServer interface {
 
 func RegisterGameServiceServer(s grpc.ServiceRegistrar, srv GameServiceServer) {
 	s.RegisterService(&GameService_ServiceDesc, srv)
+}
+
+func _GameService_Greetserver_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GreetRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).Greetserver(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/game.GameService/Greetserver",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).Greetserver(ctx, req.(*GreetRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_AddRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RoomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).AddRoom(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/game.GameService/AddRoom",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).AddRoom(ctx, req.(*RoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_GetRoomInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RoomRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).GetRoomInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/game.GameService/GetRoomInfo",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).GetRoomInfo(ctx, req.(*RoomRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _GameService_GetRooms_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(GameServiceServer).GetRooms(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/game.GameService/GetRooms",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(GameServiceServer).GetRooms(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _GameService_TicTacToeGame_Handler(srv interface{}, stream grpc.ServerStream) error {
@@ -126,7 +257,24 @@ func (x *gameServiceTicTacToeGameServer) Recv() (*GameRequest, error) {
 var GameService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "game.GameService",
 	HandlerType: (*GameServiceServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "Greetserver",
+			Handler:    _GameService_Greetserver_Handler,
+		},
+		{
+			MethodName: "AddRoom",
+			Handler:    _GameService_AddRoom_Handler,
+		},
+		{
+			MethodName: "GetRoomInfo",
+			Handler:    _GameService_GetRoomInfo_Handler,
+		},
+		{
+			MethodName: "GetRooms",
+			Handler:    _GameService_GetRooms_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "TicTacToeGame",

@@ -5,12 +5,21 @@ syntax = "proto3";
 // (詳細は4章にて)
 option go_package = "pkg/grpc";
 
+import "google/protobuf/empty.proto";
+
 // packageの宣言
 package game;
 
 // サービスの定義
 service GameService {
 	// サービスが持つメソッドの定義
+	rpc Greetserver(GreetRequest) returns (GreetResponse);
+
+	rpc AddRoom(RoomRequest) returns (RoomInfo);
+
+	rpc GetRoomInfo(RoomRequest) returns (RoomInfo);
+
+	rpc GetRooms(google.protobuf.Empty) returns (RoomList);
 
 	//Bidirectional Chat
 	rpc TicTacToeGame(stream GameRequest) returns (stream GameResponse);
@@ -29,4 +38,25 @@ message GameResponse {
 	int32 x = 2;
 	int32 y = 3;
 	bool attack = 4;
+}
+
+message GreetRequest {
+	string msg = 1;
+}
+
+message GreetResponse {
+	string msg = 1;
+}
+
+message RoomRequest {
+	string room_id = 1;
+}
+
+message RoomInfo {
+	string room_id = 1;
+	int32 meg_count = 2;
+}
+
+message RoomList {
+	repeated RoomInfo room = 1;
 }
