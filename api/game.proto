@@ -15,7 +15,7 @@ service GameService {
 	// サービスが持つメソッドの定義
 	rpc Greetserver(GreetRequest) returns (GreetResponse);
 
-	rpc AddRoom(RoomRequest) returns (RoomInfo);
+	rpc AddRoom(google.protobuf.Empty) returns (RoomInfo);
 
 	rpc GetRoomInfo(RoomRequest) returns (RoomInfo);
 
