@@ -2,10 +2,12 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"errors"
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net"
 	"os"
 	"os/signal"
@@ -15,6 +17,11 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/types/known/emptypb"
+)
+
+const (
+	ROOM_ID_MAX = 100000
 )
 
 var count int
@@ -127,11 +134,17 @@ func (s *TicTocToeGameServer) Greet(ctx context.Context,r *tictactoepb.GreetRequ
 	return &tictactoepb.GreetResponse{Msg: fmt.Sprintf("Hello %s!",r.GetMsg())},nil
 }
 
-func (s *TicTocToeGameServer) AddRoom(ctx context.Context,r *tictactoepb.RoomRequest) (*tictactoepb.RoomInfo,error) {
+func (s *TicTocToeGameServer) AddRoom(ctx context.Context,_ *emptypb.Empty) (*tictactoepb.RoomInfo,error) {
 	log.Printf("Add Room Request")
 
-	s.rooms = append(s.rooms,room{room_id: r.GetRoomId()})
-	index, err := searchRoom(s.rooms,r.RoomId)
+	
+	roomId, err := rand.Int(rand.Reader,big.NewInt(ROOM_ID_MAX))
+	if err !=  nil {
+		return nil,err
+	}
+
+	s.rooms = append(s.rooms,room{room_id: roomId.String()})
+	index, err := searchRoom(s.rooms,roomId.String())
 	if err != nil {
 		log.Fatal(err)
 	}

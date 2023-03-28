@@ -25,7 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type GameServiceClient interface {
 	// サービスが持つメソッドの定義
 	Greetserver(ctx context.Context, in *GreetRequest, opts ...grpc.CallOption) (*GreetResponse, error)
-	AddRoom(ctx context.Context, in *RoomRequest, opts ...grpc.CallOption) (*RoomInfo, error)
+	AddRoom(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomInfo, error)
 	GetRoomInfo(ctx context.Context, in *RoomRequest, opts ...grpc.CallOption) (*RoomInfo, error)
 	GetRooms(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomList, error)
 	//Bidirectional Chat
@@ -49,7 +49,7 @@ func (c *gameServiceClient) Greetserver(ctx context.Context, in *GreetRequest, o
 	return out, nil
 }
 
-func (c *gameServiceClient) AddRoom(ctx context.Context, in *RoomRequest, opts ...grpc.CallOption) (*RoomInfo, error) {
+func (c *gameServiceClient) AddRoom(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*RoomInfo, error) {
 	out := new(RoomInfo)
 	err := c.cc.Invoke(ctx, "/game.GameService/AddRoom", in, out, opts...)
 	if err != nil {
@@ -113,7 +113,7 @@ func (x *gameServiceTicTacToeGameClient) Recv() (*GameResponse, error) {
 type GameServiceServer interface {
 	// サービスが持つメソッドの定義
 	Greetserver(context.Context, *GreetRequest) (*GreetResponse, error)
-	AddRoom(context.Context, *RoomRequest) (*RoomInfo, error)
+	AddRoom(context.Context, *emptypb.Empty) (*RoomInfo, error)
 	GetRoomInfo(context.Context, *RoomRequest) (*RoomInfo, error)
 	GetRooms(context.Context, *emptypb.Empty) (*RoomList, error)
 	//Bidirectional Chat
@@ -128,7 +128,7 @@ type UnimplementedGameServiceServer struct {
 func (UnimplementedGameServiceServer) Greetserver(context.Context, *GreetRequest) (*GreetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Greetserver not implemented")
 }
-func (UnimplementedGameServiceServer) AddRoom(context.Context, *RoomRequest) (*RoomInfo, error) {
+func (UnimplementedGameServiceServer) AddRoom(context.Context, *emptypb.Empty) (*RoomInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddRoom not implemented")
 }
 func (UnimplementedGameServiceServer) GetRoomInfo(context.Context, *RoomRequest) (*RoomInfo, error) {
@@ -172,7 +172,7 @@ func _GameService_Greetserver_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _GameService_AddRoom_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RoomRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -184,7 +184,7 @@ func _GameService_AddRoom_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/game.GameService/AddRoom",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GameServiceServer).AddRoom(ctx, req.(*RoomRequest))
+		return srv.(GameServiceServer).AddRoom(ctx, req.(*emptypb.Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
