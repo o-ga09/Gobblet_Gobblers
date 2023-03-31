@@ -13,24 +13,31 @@ package game;
 // サービスの定義
 service GameService {
 	// サービスが持つメソッドの定義
+	//サーバヘルスチェック用
 	rpc Greetserver(GreetRequest) returns (GreetResponse);
 
-	rpc AddRoom(google.protobuf.Empty) returns (RoomInfo);
+	//ルームを追加
+	rpc AddRoom(RoomRequest) returns (RoomInfo);
 
+	//ルームに参加
+	rpc JoinRoom(RoomRequest) returns (RoomInfo);
+
+	//指定したルーム情報を取得
 	rpc GetRoomInfo(RoomRequest) returns (RoomInfo);
 
+	//ルーム情報一覧を取得
 	rpc GetRooms(google.protobuf.Empty) returns (RoomList);
 
-	//Bidirectional Chat
+	//ゲームメイン通信用
 	rpc TicTacToeGame(stream GameRequest) returns (stream GameResponse);
 }
 
 // 型の定義
 message GameRequest {
-	string playerName = 1;
-	int32 x = 2;
-	int32 y = 3;
-	bool attack = 4;
+	string room_id = 1;
+	string playername = 2;
+	int32 x = 3;
+	int32 y = 4;
 }
 
 message GameResponse {
@@ -50,11 +57,11 @@ message GreetResponse {
 
 message RoomRequest {
 	string room_id = 1;
+	string playername = 2;
 }
 
 message RoomInfo {
 	string room_id = 1;
-	int32 meg_count = 2;
 }
 
 message RoomList {

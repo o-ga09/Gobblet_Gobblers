@@ -30,7 +30,7 @@ func main() {
 	
 		switch in {
 		case "1":
-			if err := client.CreateRoom(context.Background());err != nil {
+			if err := client.CreateRoom(context.Background(),"1");err != nil {
 				continue
 			}
 		case "2":

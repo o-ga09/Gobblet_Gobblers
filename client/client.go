@@ -10,7 +10,6 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type GameClient struct {
@@ -31,8 +30,8 @@ func (c *GameClient) GreetServer(ctx context.Context,name string) error {
 	return nil
 }
 
-func (c *GameClient) CreateRoom(ctx context.Context) error {
-	r, err := c.Client.AddRoom(ctx,&emptypb.Empty{})
+func (c *GameClient) CreateRoom(ctx context.Context,playername string) error {
+	r, err := c.Client.AddRoom(ctx,&tictactoepb.RoomRequest{RoomId: "",Playername: playername})
 	if err != nil {
 		return err
 	}
