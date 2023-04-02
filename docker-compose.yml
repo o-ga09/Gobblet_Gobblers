@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  app:
+    image: game-server
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      GAME_ENV: prod
+      PORT: 8080
+      GAME_REDIS_HOST: game-redis
+      GAME_REDIS_PORT: 36379
+    volumes:
+      - .:/app
+    ports:
+      - '8080:8080'
+  game-redis:
+    image: "redis:latest"
+    container_name: game-redisServer
+    ports:
+      - '36379:6379'
+    volumes:
+      - "./data/redis:/data"

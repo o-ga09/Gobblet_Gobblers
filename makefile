@@ -10,10 +10,10 @@ build-local:
 	docker compose build --no-cache
 
 build-dev:
-	docker-compose -f docker-compose_dev.yml build
+	docker-compose -f docker-compose.yml build
 
 up-dev:
-	docker-compose -f docker-compose_dev.yml up -d
+	docker-compose -f docker-compose.yml up -d
 
 up:
 	docker compose up

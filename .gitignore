@@ -1,0 +1,11 @@
+tmp/
+server/tmp/
+.DS_Store 
+.git
+_sample/
+.vscode
+通信ロジック.txt
+go.mod
+go.sum
+memo.txt
+main
