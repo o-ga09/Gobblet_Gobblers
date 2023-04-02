@@ -57,11 +57,12 @@ message GreetResponse {
 
 message RoomRequest {
 	string room_id = 1;
-	string playername = 2;
 }
 
 message RoomInfo {
 	string room_id = 1;
+	int32 playername = 2;
+	bool attack = 3;
 }
 
 message RoomList {

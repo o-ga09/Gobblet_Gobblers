@@ -1,29 +1,25 @@
 package cmd
 
-import (
-	"fmt"
-)
+var EMPTY = 9999
 
+//Pos構造体を生成
+func NewPlayer() (*Pos,error) {
+	return &Pos{},nil
+}
+
+//盤面の初期化
 func Init(board *[][]int){
 	for v := range (*board) {
 		(*board)[v] = make([]int,COLUMN_NUM)
 	}
 	for i := 0;i < ROW_NUM;i++ {
 		for j := 0;j < COLUMN_NUM;j++{
-			(*board)[i][j] = 0
+			(*board)[i][j] = EMPTY
 		}
 	}
 }
 
-func (player *Pos) PrintBoard(board *[][]int) {
-	for i := 0;i < ROW_NUM;i++ {
-		for j := 0;j < COLUMN_NUM;j++{
-			fmt.Print((*board)[i][j])
-		}
-		fmt.Printf("\n")
-	}
-}
-
+//勝利判定などゲームのコアな部分の処理はPosのメソッドとする
 func (player *Pos) Row_check(board *[][]int) bool {
 	for i := 0;i < ROW_NUM;i++ {
 		if (((*board)[i][0] == (*board)[i][1] && (*board)[i][1] == (*board)[i][2] && (*board)[i][0] == (*board)[i][2]) && (*board)[i][0] == player.Attack){
@@ -58,19 +54,7 @@ func (player *Pos) Is_win(board *[][]int) bool {
 	return false
 }
 
-func (player *Pos) InputPlayer(board *[][]int) {
-	fmt.Printf("Player %d (x y) : ",player.Attack)
-	fmt.Scanf("%d %d",&player.X,&player.Y)
-	fmt.Printf("x:%d,y:%d\n",player.X,player.Y)
-	if (player.Is_empty(board,player.X,player.Y)) {
-		(*board)[player.X][player.Y] = player.Attack
-	}
-}
 
 func (player *Pos) Is_empty(board *[][]int,x int,y int) bool {
-	return (*board)[x][y] == 0
-}
-
-func NewPlayer() (*Pos,error) {
-	return &Pos{},nil
+	return (*board)[x][y] == EMPTY
 }

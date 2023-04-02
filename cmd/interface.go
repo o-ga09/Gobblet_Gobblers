@@ -4,8 +4,6 @@ const (
 	N = 3
 	ROW_NUM = 3
 	COLUMN_NUM = 3
-	PLAYER1 = 1
-	PALYER2 = 2
 )
 
 
@@ -13,7 +11,7 @@ type Pos struct {
 	Attack int
 	X int
 	Y int
-	order bool
+	Order bool
 }
 
 // type Square struct {

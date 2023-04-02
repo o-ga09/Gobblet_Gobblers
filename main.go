@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"main/client"
-	"main/cmd"
 	"os"
 )
 
@@ -30,31 +29,21 @@ func main() {
 	
 		switch in {
 		case "1":
-			if err := client.CreateRoom(context.Background(),"1");err != nil {
+			if err := client.CreateRoom(context.Background());err != nil {
 				continue
 			}
 		case "2":
+			scanner.Scan()
 			roomId := scanner.Text()
 			if err := client.JoinRoom(context.Background(),roomId);err != nil {
+				fmt.Println(err)
 				continue
 			}
 		}
 	}
-
-	//ゲーム処理構造体を生成
-	player, _ := cmd.NewPlayer()
-	//三目並べ盤面生成
-	board := make([][]int, cmd.ROW_NUM)
-	//三目並べ盤面初期化
-	cmd.Init(&board)
 	
 	//ゲーム処理メイン
-	for {
-		player.InputPlayer(&board)
-		player.PrintBoard(&board)
-		if (player.Is_win(&board)) {
-			fmt.Printf("Player 1 is Win\n")
-			break
-		}
+	if err := client.CommunicateWithServer();err != nil {
+		fmt.Printf("err : %v",err)
 	}
 }

@@ -21,6 +21,7 @@ import (
 
 const (
 	ROOM_ID_MAX = 100000
+	EMPTY = 99999
 )
 
 type TicTocToeGameServer struct {
@@ -30,7 +31,7 @@ type TicTocToeGameServer struct {
 
 type room struct {
 	room_id string
-	member [2]string
+	member [2]int32
 	contents []*gameInfo
 }
 
@@ -69,32 +70,19 @@ func (s *TicTocToeGameServer) TicTacToeGame(stream tictactoepb.GameService_TicTa
 	rcvCh := make(chan *tictactoepb.GameRequest)
 	go s.receive(rcvCh,stream)
 
+	replyCh := make(chan *tictactoepb.GameRequest,1)
+	defer close(replyCh)
+	go s.reply(rcvCh,replyCh,stream)
+
 	for {
 		select {
-		case v :=<- rcvCh:
-			log.Printf("Received: [playername]%v, [X]%v, [Y]%v",v.GetPlayername(),v.GetX(),v.GetY())
-			// チャットルームの探索
-			index, err := searchRoom(s.rooms, v.GetRoomId())
-			if err != nil {
-				return err
-			}
-			// 対象チャットルーム
-			targetRoom := s.rooms[index]
-			msg, _ := latestMessage(targetRoom.contents)
-			// クライアントへメッセージ送信
-			if err := stream.Send(&tictactoepb.GameResponse{
-				PlayerName: msg.name,
-				X: int32(msg.x),
-				Y: int32(msg.y),
-				
-			}); err != nil {
-				return err
-			}
-			log.Printf("Sent : [playername]%v,[room id] %v, [X]%v, [Y]%v",v.GetPlayername(),v.GetRoomId(),v.GetX(),v.GetY())
-		default:
-			log.Printf("waiting")
+		case v := <- rcvCh:
+			log.Printf("Received: [playername]%v,[room id]%v, [X]%v, [Y]%v",v.GetPlayername(),v.GetRoomId(),v.GetX(),v.GetY())
+		case v := <- replyCh:
+			log.Printf("Sent : [playername]%v,[room id]%v [X]%v, [Y]%v",v.GetPlayername(),v.GetRoomId(),v.GetX(),v.GetY())		
 		}
 	}
+	return nil
 }
 
 func NewGameServer() *TicTocToeGameServer {
@@ -108,6 +96,10 @@ func (s *TicTocToeGameServer)receive(ch chan<- *tictactoepb.GameRequest,stream t
 			continue
 		}
 
+		if err != nil {
+			log.Fatalf("failed to Rcv(): %v",err)
+		}
+
 		newR := &gameInfo{
 			in.GetPlayername(),
 			int(in.GetX()),
@@ -116,15 +108,41 @@ func (s *TicTocToeGameServer)receive(ch chan<- *tictactoepb.GameRequest,stream t
 
 		index, err := searchRoom(s.rooms,in.GetRoomId())
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalf("failed to look up data [room id] in receive : %v",err)
 		}
 		s.rooms[index].contents = append(s.rooms[index].contents, newR)
 		ch <- &tictactoepb.GameRequest{
-			RoomId: in.GetPlayername(),
+			RoomId: in.RoomId,
 			Playername: in.GetPlayername(),
 			X: in.GetX(),
 			Y: in.GetY(),
 		}
+	}
+}
+
+func (s *TicTocToeGameServer) reply(rcvCh <-chan *tictactoepb.GameRequest, replyCh chan<- *tictactoepb.GameRequest,stream tictactoepb.GameService_TicTacToeGameServer) {
+	for {
+		in, ok := <- rcvCh
+		if !ok {
+			log.Printf("channel is closed")
+			continue
+		} 
+		log.Printf("rcvChを受信")
+		// チャットルームの探索
+		index, err := searchRoom(s.rooms, in.GetRoomId())
+		if err != nil {
+			continue
+		}
+		// 対象チャットルーム
+		targetRoom := s.rooms[index]
+		msg, _ := latestMessage(targetRoom.contents)
+		r := &tictactoepb.GameRequest{
+			RoomId: targetRoom.room_id,
+			Playername: msg.name,
+			X: int32(msg.x),
+			Y: int32(msg.y),
+		}
+		replyCh <- r
 	}
 }
 
@@ -142,17 +160,21 @@ func (s *TicTocToeGameServer) AddRoom(ctx context.Context,r *tictactoepb.RoomReq
 		return nil,err
 	}
 
-	member := [2]string{}
-	member[0] = r.GetPlayername()
-	member[1] = ""
+	member := [2]int32{}
+	member[0] = int32(roomId.Int64())%2
+	member[1] = EMPTY
+
+	order := false
+	if member[0] == 0 {order = true}
+	
 	s.rooms = append(s.rooms,room{room_id: roomId.String(),member: member})
 	index, err := searchRoom(s.rooms,roomId.String())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to look up date [room id] in add room : %v",err)
 	}
 
 	room := s.rooms[index]
-	return &tictactoepb.RoomInfo{RoomId: room.room_id},nil
+	return &tictactoepb.RoomInfo{RoomId: room.room_id,Playername: room.member[0],Attack: order},nil
 }
 
 func (s *TicTocToeGameServer) JoinRoom(ctx context.Context,r *tictactoepb.RoomRequest) (*tictactoepb.RoomInfo,error) {
@@ -163,13 +185,15 @@ func (s *TicTocToeGameServer) JoinRoom(ctx context.Context,r *tictactoepb.RoomRe
 		return nil, err
 	}
 
-	room := s.rooms[index]
-	if room.member[1] != "" {
+	if s.rooms[index].member[1] != EMPTY {
 		return nil,errors.New("room is fulled")
 	}else {
-		room.member[1] = r.GetPlayername()
+		s.rooms[index].member[1] = 1 - s.rooms[index].member[0]
 	}
-	return &tictactoepb.RoomInfo{RoomId: room.room_id},nil
+
+	order := false
+	if s.rooms[index].member[1] == 0 {order = true}
+	return &tictactoepb.RoomInfo{RoomId: s.rooms[index].room_id,Playername: s.rooms[index].member[1],Attack: order},nil
 }
 
 func (s *TicTocToeGameServer) GetRoomInfo(ctx context.Context,r *tictactoepb.RoomRequest) (*tictactoepb.RoomInfo,error) {
@@ -209,7 +233,7 @@ func searchRoom(r []room,room_id string) (int,error) {
 func latestMessage(message []*gameInfo) (gameInfo,error) {
 	length := len(message)
 	if length == 0 {
-		return gameInfo{},errors.New("noot found")
+		return gameInfo{},errors.New("not found")
 	}
 	return *message[length - 1],nil
 }
