@@ -12,7 +12,9 @@ import (
 	"os"
 	"os/signal"
 
+	"main/config"
 	tictactoepb "main/pkg/grpc"
+	"main/store"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc"
@@ -28,6 +30,7 @@ type TicTocToeGameServer struct {
 	tictactoepb.UnimplementedGameServiceServer
 	room_id string
 	rooms []room
+	store store.KVS
 }
 
 type room struct {
@@ -86,7 +89,21 @@ func (s *TicTocToeGameServer) TicTacToeGame(stream tictactoepb.GameService_TicTa
 }
 
 func NewGameServer() *TicTocToeGameServer {
-	return &TicTocToeGameServer{}
+
+	config, err := config.New()
+	if err != nil {
+		log.Printf("failed to load config")
+	}
+
+
+	store, err := store.NewKVS(context.Background(),config)
+	if err != nil {
+		log.Printf("failed to connect redis")
+	}
+
+	return &TicTocToeGameServer{
+		store: *store,
+	}
 }
 
 func (s *TicTocToeGameServer)receive(ch chan<- *tictactoepb.GameRequest,stream tictactoepb.GameService_TicTacToeGameServer) {
