@@ -9,3 +9,4 @@ go.mod
 go.sum
 memo.txt
 main
+data/redis
