@@ -12,7 +12,7 @@ func TestNew(t *testing.T) {
 	var wants [5]string
 
 	//	テストデータ読み込み
-	f , err := os.Open("../testdata/config_test.csv")
+	f , err := os.Open("../testdata/config_test/config_test.csv")
 	if err != nil {
 		t.Fatal(err)
 	}
