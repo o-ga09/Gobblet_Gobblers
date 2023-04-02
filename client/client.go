@@ -3,7 +3,6 @@ package client
 import (
 	"bufio"
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -135,29 +134,9 @@ func (c *GameClient) CommunicateWithServer() error {
 			fmt.Printf("now , player %s are marked in [ %d, %d ]\n",(*v).GetPlayerName(),(*v).GetX(),(*v).GetY())
 			
 			if t, err := strconv.Atoi((*v).GetPlayerName());err != nil {
-				return errors.New("can not convert string to int")
+				continue
 			} else {
-				(c.Board)[c.Player.X][c.Player.Y] = t
-			}
-
-			if c.Player.Is_win(&c.Board) {
-				fmt.Printf("Player %s is Win ! ",(*v).GetPlayerName())
-				return nil
-			}
-
-			if strings.Compare(strconv.Itoa(c.Player.Attack),(*v).PlayerName)  == 0{
-				c.Player.Order = false
-			} else {
-				c.Player.Order = true
-				c.InputPlayer()
-				if err := stream.Send(&tictactoepb.GameRequest{
-					RoomId: c.RoomId,
-					Playername: strconv.Itoa(c.Player.Attack),
-					X: int32(c.Player.X),
-					Y: int32(c.Player.Y),
-				}); err != nil {
-					log.Fatalf("failed to send : %v",err)
-				}
+				(c.Board)[(*v).GetX()][(*v).GetY()] = t
 			}
 			for i := 0;i < cmd.ROW_NUM;i++ {
 				fmt.Printf("[ ")
@@ -169,6 +148,26 @@ func (c *GameClient) CommunicateWithServer() error {
 				fmt.Printf(" ]\n")
 			}
 			fmt.Printf("\n")
+			
+			if c.Player.Is_win(&c.Board) {
+				fmt.Printf("Player %s is Win ! ",(*v).GetPlayerName())
+				return nil
+			}
+			
+			if strings.Compare(strconv.Itoa(c.Player.Attack),(*v).PlayerName)  == 0{
+				c.Player.Order = false
+				} else {
+					c.Player.Order = true
+					c.InputPlayer()
+					if err := stream.Send(&tictactoepb.GameRequest{
+						RoomId: c.RoomId,
+					Playername: strconv.Itoa(c.Player.Attack),
+					X: int32(c.Player.X),
+					Y: int32(c.Player.Y),
+				}); err != nil {
+					log.Fatalf("failed to send : %v",err)
+				}
+			}
 		}
 	}
 }

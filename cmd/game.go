@@ -22,7 +22,7 @@ func Init(board *[][]int){
 //勝利判定などゲームのコアな部分の処理はPosのメソッドとする
 func (player *Pos) Row_check(board *[][]int) bool {
 	for i := 0;i < ROW_NUM;i++ {
-		if (((*board)[i][0] == (*board)[i][1] && (*board)[i][1] == (*board)[i][2] && (*board)[i][0] == (*board)[i][2]) && (*board)[i][0] == player.Attack){
+		if (((*board)[i][0] == (*board)[i][1] && (*board)[i][1] == (*board)[i][2] && (*board)[i][0] == (*board)[i][2]) && (*board)[i][0] != EMPTY){
 			return true
 		}
 	}
@@ -31,7 +31,7 @@ func (player *Pos) Row_check(board *[][]int) bool {
 
 func (player *Pos) Column_check(board *[][]int) bool{
 	for i := 0;i < COLUMN_NUM;i++ {
-		if (((*board)[0][i] == (*board)[1][i] && (*board)[1][i] == (*board)[2][i] && (*board)[0][i] == (*board)[2][i]) && (*board)[0][i] == player.Attack){
+		if (((*board)[0][i] == (*board)[1][i] && (*board)[1][i] == (*board)[2][i] && (*board)[0][i] == (*board)[2][i]) && (*board)[0][i] != EMPTY){
 			return true
 		}
 	}
@@ -39,9 +39,9 @@ func (player *Pos) Column_check(board *[][]int) bool{
 }
 
 func (player *Pos) Cross_check(board *[][]int) bool {
-	if (((*board)[0][0] == (*board)[1][1] && (*board)[1][1] == (*board)[2][2] && (*board)[0][0] == (*board)[2][2]) && (*board)[0][0] == player.Attack){
+	if (((*board)[0][0] == (*board)[1][1] && (*board)[1][1] == (*board)[2][2] && (*board)[0][0] == (*board)[2][2]) && (*board)[0][0] != EMPTY){
 		return true
-	}else if (((*board)[0][2] == (*board)[1][1] && (*board)[1][1] == (*board)[2][0] && (*board)[0][2] == (*board)[2][0]) && (*board)[0][2] == player.Attack){
+	}else if (((*board)[0][2] == (*board)[1][1] && (*board)[1][1] == (*board)[2][0] && (*board)[0][2] == (*board)[2][0]) && (*board)[0][2] != EMPTY){
 		return true
 	}
 	return false

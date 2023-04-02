@@ -26,13 +26,14 @@ const (
 
 type TicTocToeGameServer struct {
 	tictactoepb.UnimplementedGameServiceServer
+	room_id string
 	rooms []room
 }
 
 type room struct {
 	room_id string
 	member [2]int32
-	contents []*gameInfo
+	contents []gameInfo
 }
 
 type gameInfo struct {
@@ -70,16 +71,15 @@ func (s *TicTocToeGameServer) TicTacToeGame(stream tictactoepb.GameService_TicTa
 	rcvCh := make(chan *tictactoepb.GameRequest)
 	go s.receive(rcvCh,stream)
 
-	replyCh := make(chan *tictactoepb.GameRequest,1)
-	defer close(replyCh)
-	go s.reply(rcvCh,replyCh,stream)
+	replyCh := make(chan *tictactoepb.GameResponse)
+	go s.reply(replyCh,s.room_id,stream)
 
 	for {
 		select {
-		case v := <- rcvCh:
-			log.Printf("Received: [playername]%v,[room id]%v, [X]%v, [Y]%v",v.GetPlayername(),v.GetRoomId(),v.GetX(),v.GetY())
-		case v := <- replyCh:
-			log.Printf("Sent : [playername]%v,[room id]%v [X]%v, [Y]%v",v.GetPlayername(),v.GetRoomId(),v.GetX(),v.GetY())		
+			case v := <- rcvCh:
+				log.Printf("Received: [playername]%v,[room id]%v, [X]%v, [Y]%v",v.GetPlayername(),v.GetRoomId(),v.GetX(),v.GetY())
+			case v := <- replyCh:
+				log.Printf("Sent : [playername]%v [X]%v, [Y]%v",v.GetPlayerName(),v.GetX(),v.GetY())		
 		}
 	}
 	return nil
@@ -100,7 +100,7 @@ func (s *TicTocToeGameServer)receive(ch chan<- *tictactoepb.GameRequest,stream t
 			log.Fatalf("failed to Rcv(): %v",err)
 		}
 
-		newR := &gameInfo{
+		newR := gameInfo{
 			in.GetPlayername(),
 			int(in.GetX()),
 			int(in.GetY()),
@@ -120,29 +120,33 @@ func (s *TicTocToeGameServer)receive(ch chan<- *tictactoepb.GameRequest,stream t
 	}
 }
 
-func (s *TicTocToeGameServer) reply(rcvCh <-chan *tictactoepb.GameRequest, replyCh chan<- *tictactoepb.GameRequest,stream tictactoepb.GameService_TicTacToeGameServer) {
+func (s *TicTocToeGameServer) reply(ch chan <- *tictactoepb.GameResponse,room_id string, stream tictactoepb.GameService_TicTacToeGameServer) {
+	// チャットルームの探索
+	index, err := searchRoom(s.rooms, room_id)
+	if err != nil {
+		return
+	}
+	// 対象チャットルーム
+	var current_count int
+	previous_count := 0
 	for {
-		in, ok := <- rcvCh
-		if !ok {
-			log.Printf("channel is closed")
-			continue
-		} 
-		log.Printf("rcvChを受信")
-		// チャットルームの探索
-		index, err := searchRoom(s.rooms, in.GetRoomId())
-		if err != nil {
-			continue
+		current_count = len(s.rooms[index].contents)
+		if previous_count < current_count {
+			if msg, err := latestMessage(s.rooms[index].contents);err != nil {
+				continue
+			} else {
+				v :=&tictactoepb.GameResponse{
+					PlayerName: msg.name,
+					X: int32(msg.x),
+					Y: int32(msg.y),
+				}
+				if err := stream.Send(v);err != nil {
+					return
+				}
+				ch <- v
+			}
 		}
-		// 対象チャットルーム
-		targetRoom := s.rooms[index]
-		msg, _ := latestMessage(targetRoom.contents)
-		r := &tictactoepb.GameRequest{
-			RoomId: targetRoom.room_id,
-			Playername: msg.name,
-			X: int32(msg.x),
-			Y: int32(msg.y),
-		}
-		replyCh <- r
+		previous_count = current_count
 	}
 }
 
@@ -167,6 +171,7 @@ func (s *TicTocToeGameServer) AddRoom(ctx context.Context,r *tictactoepb.RoomReq
 	order := false
 	if member[0] == 0 {order = true}
 	
+	s.room_id = roomId.String()
 	s.rooms = append(s.rooms,room{room_id: roomId.String(),member: member})
 	index, err := searchRoom(s.rooms,roomId.String())
 	if err != nil {
@@ -191,6 +196,7 @@ func (s *TicTocToeGameServer) JoinRoom(ctx context.Context,r *tictactoepb.RoomRe
 		s.rooms[index].member[1] = 1 - s.rooms[index].member[0]
 	}
 
+	s.room_id = s.rooms[index].room_id
 	order := false
 	if s.rooms[index].member[1] == 0 {order = true}
 	return &tictactoepb.RoomInfo{RoomId: s.rooms[index].room_id,Playername: s.rooms[index].member[1],Attack: order},nil
@@ -230,10 +236,10 @@ func searchRoom(r []room,room_id string) (int,error) {
 	return -1,errors.New("not found")
 }
 
-func latestMessage(message []*gameInfo) (gameInfo,error) {
+func latestMessage(message []gameInfo) (gameInfo,error) {
 	length := len(message)
 	if length == 0 {
 		return gameInfo{},errors.New("not found")
 	}
-	return *message[length - 1],nil
+	return message[length - 1],nil
 }
