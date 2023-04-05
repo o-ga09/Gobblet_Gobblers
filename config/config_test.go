@@ -1,54 +1,39 @@
 package config
 
 import (
-	"encoding/csv"
-	"os"
 	"strconv"
 	"strings"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	var wants [5]string
-
-	//	テストデータ読み込み
-	f , err := os.Open("../testdata/config_test/config_test.csv")
-	if err != nil {
-		t.Fatal(err)
+	tests := []struct {
+		name    string
+		want    *Config
+		wantErr bool
+	}{
+		{name: "正常系",want: &Config{Env: "dev",Port: 8080,RedisHost: "127.0.0.1",RedisPort: 6379,RedisPassword: "P@ssword",RedisTLS: "127.0.0.1"},wantErr: false},
 	}
-	defer f.Close()
+	for _, tt := range tests {
+		if strings.Compare(tt.name,"正常系") == 0 {
+			t.Setenv("GAME_ENV",tt.want.Env)
+			t.Setenv("PORT",strconv.Itoa(tt.want.Port))
+			t.Setenv("GAME_REDIS_HOST",tt.want.RedisHost)
+			t.Setenv("GAME_REDIS_PORT",strconv.Itoa(tt.want.RedisPort))
+			t.Setenv("GAME_REDIS_PASSWORD",tt.want.RedisPassword)
+			t.Setenv("GAME_REDIS_TLS_SERVER_NAME",tt.want.RedisTLS)
+		}
 
-	data := csv.NewReader(f)
-	records, err := data.ReadAll()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	for i,record := range records {
-		if i == 0 {continue}
-		t.Setenv(record[0],record[1])
-		wants[i-1] = record[1]
-	}
-
-	got, err := New()
-	if err != nil {
-		t.Fatalf("cannot create config: %v",err)
-	}
-	
-	if strings.Compare(got.Env,wants[0]) != 0 {
-		t.Errorf("want %s, but %s",wants[0],got.Env)
-	}
-
-	if strings.Compare(strconv.Itoa(got.Port),wants[1]) != 0 {
-		t.Errorf("want %s, but %d",wants[1],got.Port)
-	}
-
-
-	if strings.Compare(got.RedisHost,wants[2]) != 0 {
-		t.Errorf("want %s, but %s",wants[2],got.RedisHost)
-	}
-
-	if strings.Compare(strconv.Itoa(got.RedisPort),wants[3]) != 0 {
-		t.Errorf("want %s, but %d",wants[3],got.RedisPort)
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := New()
+			if (err != nil) != tt.wantErr {
+				t.Errorf("New() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !strings.Contains(tt.name,"正常系") {return}
+			if got.Env != tt.want.Env || got.Port != tt.want.Port || got.RedisHost != tt.want.RedisHost || got.RedisPassword != tt.want.RedisPassword || got.RedisPort != tt.want.RedisPort || got.RedisTLS != tt.want.RedisTLS {
+				t.Errorf("New() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }

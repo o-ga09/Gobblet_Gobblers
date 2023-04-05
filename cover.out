@@ -1,0 +1,14 @@
+mode: set
+main/config/config.go:16.28,18.39 2 1
+main/config/config.go:18.39,20.3 1 0
+main/config/config.go:21.2,21.17 1 1
+main/store/store.go:19.68,21.19 2 1
+main/store/store.go:22.13,27.4 1 1
+main/store/store.go:28.14,34.4 1 1
+main/store/store.go:38.2,39.44 2 1
+main/store/store.go:39.44,41.3 1 1
+main/store/store.go:42.2,42.28 1 1
+main/store/store.go:45.70,48.2 2 1
+main/store/store.go:50.66,52.16 2 1
+main/store/store.go:52.16,54.3 1 1
+main/store/store.go:55.2,55.21 1 1

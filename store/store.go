@@ -2,6 +2,7 @@ package store
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"time"
@@ -16,9 +17,25 @@ type KVS struct {
 }
 
 func NewKVS(ctx context.Context, cfg *config.Config) (*KVS, error) {
-	cli := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%d",cfg.RedisHost,cfg.RedisPort),
-	})
+	var opt *redis.Options
+	switch (cfg.Env) {
+	case "dev":
+		opt = &redis.Options{
+			Addr: fmt.Sprintf("%s:%d",cfg.RedisHost,cfg.RedisPort),
+			Password: cfg.RedisPassword,
+			DB: 0,
+		}
+	case "prod":
+		opt = &redis.Options{
+			Addr: fmt.Sprintf("%s:%d",cfg.RedisHost,cfg.RedisPort),
+			Password: cfg.RedisPassword,
+			DB: 0,
+			TLSConfig: &tls.Config{ServerName: cfg.RedisTLS},
+		}
+
+	}
+
+	cli := redis.NewClient(opt)
 	if err := cli.Ping(ctx).Err(); err != nil {
 		return nil, err
 	}
