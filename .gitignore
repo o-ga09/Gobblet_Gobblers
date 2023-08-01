@@ -1,12 +1,10 @@
-tmp/
-server/tmp/
+backend/server/tmp/
 .DS_Store 
 .git
-_sample/
+backend/_sample/
 .vscode
 通信ロジック.txt
-go.mod
-go.sum
+backend/go.mod
+backend/go.sum
 memo.txt
-main
-data/redis
+backend/data/redis
