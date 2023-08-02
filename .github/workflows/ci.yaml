@@ -1,22 +1,50 @@
-name: React CI
-
+name: Coverage Report
 on:
   pull_request:
-
+    branches: [main]
+  workflow_dispatch:
 jobs:
-    coverage:
-        runs-on: ubuntu-latest
-        name: Coverage report
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v2
-            - name: Test coverage
-              uses: ./frontend
-              with:
-                  github-token: ${{ secrets.GITHUB_TOKEN }}
-                  test-script: npm run test:coverage
-            - name: Coverage Report
-              uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
-              with:
-                github-token: ${{ secrets.GITHUB_TOKEN }}
-                threshold: 80
+  # マトリックス戦略を使用するために、変更された packages を取得する
+  generate_matrix:
+    name: Get changed packages
+    runs-on: ubuntu-latest
+    outputs:
+      names: ${{ steps.changed_packages.outputs.names }}
+      paths: ${{ steps.changed_packages.outputs.paths }}
+      empty: ${{ steps.changed_packages.outputs.empty }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Find changed packages
+        id: changed_packages
+        uses: alexshukel/get-changed-workspaces-action@v1.0.0
+  coverage:
+    name: Coverage report
+    # このジョブを実行するためには generate_matrix が正常に完了している必要がある
+    needs: [generate_matrix]
+    if: ${{ !fromJson(needs.generate_matrix.outputs.empty) }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # 変更された packages をマトリックス戦略に渡す
+        path: ${{ fromJson(needs.generate_matrix.outputs.paths) }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Installing dependencies
+        run: npm install
+
+      - uses: artiomtr/jest-coverage-report-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          # モノレポのルートで install してるのでそれぞれのディレクトリではインストール不要
+          skip-step: install
+          # ワークフローを実行するディレクトリを指定する
+          working-directory: ${{ matrix.path }}
+          test-script: npm test:coverage
