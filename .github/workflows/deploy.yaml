@@ -52,4 +52,5 @@ jobs:
           FIREBASE_TOKEN_PROD: ${{ secrets.FIREBASE_TOKEN_PROD }}
           FIREBASE_PROJECT: ${{ secrets.FIREBASE_PROJECT }}
         run: |
+          cd frontend
           firebase deploy  --only hosting --project $FIREBASE_PROJECT --token $FIREBASE_TOKEN_PROD
