@@ -18,14 +18,16 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend
-          npm install
+          npm i
 
       - name: Test
         run: |
-          npm run test
+          cd frontend
+          npm test
 
       - name: coverage
         run: |
+          cd frontend
           npm run coverage
           echo '# Coverage :rocket:' >> $GITHUB_STEP_SUMMARY
           cat coverage/report.txt | sed '1d' | sed '$d' >> $GITHUB_STEP_SUMMARY
