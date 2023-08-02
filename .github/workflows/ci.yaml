@@ -7,23 +7,23 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Node Setup
-      uses: actions/setup-node@v1
-      with:
-        node-version: 18
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Node Setup
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
 
-    - name: Install dependencies
-      run: |
-        cd frontend 
-        npm install
+      - name: Install dependencies
+        run: |
+          cd frontend 
+          npm install
 
-    - name: Coverage Report
-      uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        working-directory: "./frontend"
-        test-command: "npm run test:coverage"
+      - name: Coverage Report
+        uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          working-directory: "./frontend"
+          test-command: "npm run test:coverage"
