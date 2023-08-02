@@ -1,5 +1,5 @@
 import { Board, Koma } from "../domain/entity";
-import { GameOutPutPort } from "./port/outputport";
+import { GameOutPutPort } from "./port/outputPort";
 
 export class GameUseCase {
     constructor(readonly gameoutputport: GameOutPutPort){}
