@@ -4,57 +4,30 @@ on:
   pull_request:
 
 jobs:
-  your_job_name: # ジョブの名前
+  ci:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Move to frontend directory
-      run: cd frontend
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18"
 
-    - name: Install dependencies
-      run: npm install
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
 
-    - name: Run tests and generate coverage report
-      run: npm test -- --coverage
+      - name: Coverage Report
+        run: |
+          cd frontend
+          npm run test:coverage
 
-    - name: Coverage Report Setup
-      uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        threshold: 80
-# name: React CI
-
-# on:
-#   pull_request:
-
-# jobs:
-#   ci:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v2
-
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v2
-#         with:
-#           node-version: "18"
-
-#       - name: Install dependencies
-#         run: |
-#           cd frontend
-#           npm install
-
-#       - name: Coverage Report Setup
-#         uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
-#         with:
-#           github-token: ${{ secrets.GITHUB_TOKEN }}
-#           threshold: 80
-
-#       - name: Coverage Report
-#         run: |
-#           cd frontend
-#           npm run test:coverage
+      - name: Coverage Report Setup
+        uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          threshold: 80
