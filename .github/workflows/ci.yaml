@@ -21,9 +21,13 @@ jobs:
           cd frontend
           npm install
 
-      - name: Coverage Report
+      - name: Coverage Report Setup
         uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          test-script: cd frontend && npm run test:coverage
           threshold: 80
+
+      - name: Coverage Report
+        run: |
+          cd frontend
+          npm run test:coverage
