@@ -26,4 +26,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           test-script: cd frontend && npm run test:coverage
-        threshold: 80
+          threshold: 80
