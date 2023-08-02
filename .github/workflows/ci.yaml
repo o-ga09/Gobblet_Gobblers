@@ -18,12 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd frontend
-          npm i
-
-      - name: Run Jest tests
-        run: |
-          cd frontend
-          npm run test
+          npm install
 
       - name: Test
         run: |
