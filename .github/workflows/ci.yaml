@@ -19,6 +19,13 @@ jobs:
         run: |
           cd frontend 
           npm install
+      
+      - name: Static check
+        run: |
+          cd frontend
+          npm run lint
+          npm run lintfix
+          npm run format
 
       - name: Coverage Report
         uses: ArtiomTr/jest-coverage-report-action@v2.0-rc.6

@@ -1,5 +1,5 @@
-import { Board } from "../../domain/entity";
+import { Board } from '../../domain/entity'
 
 export interface GameOutPutPort {
-    display(board: Board): void;
+  display(board: Board): void
 }
