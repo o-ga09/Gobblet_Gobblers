@@ -1,7 +1,6 @@
 name: React CI
 
 on:
-  push:
   pull_request:
 
 jobs:
@@ -22,14 +21,9 @@ jobs:
           cd frontend
           npm install
 
-      - name: Test
-        run: |
-          cd frontend
-          npm run test
-
-      - name: coverage
-        run: |
-          cd frontend
-          npm run coverage
-          echo '# Coverage :rocket:' >> $GITHUB_STEP_SUMMARY
-          cat coverage/report.txt | sed '1d' | sed '$d' >> $GITHUB_STEP_SUMMARY
+      - name: Coverage Report
+        use: ArtiomTr/jest-coverage-report-action@v2.0-rc.6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          test-script: cd frontend && npm run test:coverage
+        threshold: 80
