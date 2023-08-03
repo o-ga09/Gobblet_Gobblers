@@ -1,11 +1,11 @@
-import { Board } from "../../lib/domain/entity";
+import { Board } from '../../lib/domain/entity';
 
 export class GameState {
-    board: number[][] = [];
-    boardImg: string[] = [];
+  board: number[][] = [];
+  boardImg: string[] = [];
 
-    setBoard(b: Board) {
-        this.board = b.board;
-        this.boardImg = b.boardImg;
-    }
+  setBoard(b: Board) {
+    this.board = b.board;
+    this.boardImg = b.boardImg;
+  }
 }
