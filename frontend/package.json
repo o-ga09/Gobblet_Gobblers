@@ -11,7 +11,7 @@
     "test": "jest",
     "test:coverage": "npm run test -- --coverage --silent --testLocationInResults --ci --json --outputFile=\"report.json\"",
     "lintfix": "npm run lint -- --fix",
-    "format": "eslint --cache --fix 'src/**/*.{js,jsx,ts,tsx}' && prettier --write 'src/**/*.{js,jsx,ts,tsx}"
+    "format": "eslint --cache --fix 'src/**/*.{js,jsx,ts,tsx}' && prettier --write 'src/**/*.{js,jsx,ts,tsx}'"
   },
   "dependencies": {
     "@chakra-ui/icons": "^2.1.0",
@@ -28,6 +28,7 @@
   "devDependencies": {
     "@swc/jest": "^0.2.27",
     "@types/jest": "^29.5.3",
+    "@types/jest-when": "^3.5.2",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^5.10.1",
