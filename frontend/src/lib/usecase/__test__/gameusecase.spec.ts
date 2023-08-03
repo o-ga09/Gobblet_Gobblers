@@ -12,39 +12,11 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0]
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0]
     ];
-    const arg2 = [
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white'
-    ];
+    const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
     const actual = usecase.input(1, 1, arg1, arg2);
     const expected = new Koma(1, 0, 1);
     expect(actual).toEqual(expected);
@@ -69,39 +41,11 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0]
+      [1, 0, 0],
+      [1, 0, 0],
+      [1, 0, 0]
     ];
-    const arg2 = [
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white'
-    ];
+    const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
     const board = new Board(arg1, arg2);
     const actual = usecase.checkVertical(board);
     const expected = true;
@@ -116,11 +60,9 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [1, 1, 1, 1, 1],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0]
+      [1, 1, 1],
+      [0, 0, 0],
+      [0, 0, 0]
     ];
     const arg2 = [
       'white',
@@ -169,33 +111,7 @@ describe('ユースケースのテスト', () => {
       [0, 0, 0, 1, 0],
       [0, 0, 0, 0, 1]
     ];
-    const arg2 = [
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white'
-    ];
+    const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
     const board = new Board(arg1, arg2);
     const actual = usecase.checkCross(board);
     const expected = true;
@@ -210,11 +126,9 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg = [
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0],
-      [1, 0, 0, 0, 0]
+      [1, 0, 0],
+      [1, 0, 0],
+      [1, 0, 0]
     ];
     const actual = usecase.isWin(arg);
     const expected = true;
@@ -229,39 +143,11 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1]
+      [1, 1, 1],
+      [1, 1, 1],
+      [1, 1, 1]
     ];
-    const arg2 = [
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white'
-    ];
+    const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
     const board = new Board(arg1, arg2);
     const koma = new Koma(1, 1, 1);
     const actual = usecase.isEmpty(board, koma);

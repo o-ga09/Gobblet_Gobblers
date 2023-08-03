@@ -75,8 +75,8 @@ function App() {
       </Heading>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center">
         <h1>{turn} のターン</h1>
-        <Grid templateColumns="repeat(5, 0fr)" gap={1} marginTop="30px">
-          {[...Array(25)].map((_, rowIndex) => (
+        <Grid templateColumns="repeat(3, 0fr)" gap={1} marginTop="30px">
+          {[...Array(9)].map((_, rowIndex) => (
             <Box
               key={rowIndex}
               h="80px"
