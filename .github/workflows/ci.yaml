@@ -2,7 +2,6 @@ name: Coverage Report
 on:
   pull_request:
     branches: [main]
-  workflow_dispatch:
 jobs:
   tests:
     runs-on: ubuntu-latest
