@@ -87,7 +87,7 @@ export class GameUseCase {
       board.board[0][2] == board.board[1][1] &&
       board.board[1][1] == board.board[2][0] &&
       board.board[0][2] == board.board[2][0] &&
-      board.board[0][0] != 0
+      board.board[0][2] != 0
     ) {
       return true;
     }
