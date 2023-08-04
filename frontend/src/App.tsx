@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Grid,
+  GridItem,
   Heading,
   Modal,
   ModalBody,
@@ -21,6 +22,7 @@ function App() {
   const [winner, setWinner] = useState(0);
   const [, setBoard] = useState<number[][]>([]);
   const [boardImg, setBoardImg] = useState<string[]>([]);
+  const [koma, setKoma] = useState<string[]>([]);
 
   const [playerImg1, setImg1] = useState('');
   const [playerImg2, setImg2] = useState('');
@@ -62,10 +64,18 @@ function App() {
     usecase.init();
     setBoard(gameState.board);
     setBoardImg(gameState.boardImg);
+    setKoma([]);
   };
 
   const closeModal = () => {
     onClose();
+  };
+
+  const selectKoma = (id: number, koma: string[]) => {
+    console.log(koma);
+    koma[id] = '選択中';
+    const newKoma = koma;
+    setKoma(newKoma);
   };
 
   return (
@@ -75,8 +85,8 @@ function App() {
       </Heading>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center">
         <h1>{turn} のターン</h1>
-        <Grid templateColumns="repeat(5, 0fr)" gap={1} marginTop="30px">
-          {[...Array(25)].map((_, rowIndex) => (
+        <Grid templateColumns="repeat(3, 0fr)" gap={1} marginTop="30px">
+          {[...Array(9)].map((_, rowIndex) => (
             <Box
               key={rowIndex}
               h="80px"
@@ -104,6 +114,27 @@ function App() {
             </Box>
           ))}
         </Grid>
+
+        <Box w="700px" display="flex" justifyContent="center">
+          <Grid templateColumns="repeat(6, 1fr)" gap={1} marginTop="30px">
+            {[...Array(6)].map((_, id) => (
+              <Box
+                key={id}
+                w="80px"
+                h="80px"
+                border="1px solid #ccc"
+                bg="teal.200"
+                cursor="pointer"
+                borderRadius="md"
+                boxShadow="md"
+                onClick={() => selectKoma(id, koma)}
+              >
+                {koma[id]}
+              </Box>
+            ))}
+          </Grid>
+        </Box>
+
         <Box w="700px" display="flex" justifyContent="flex-end">
           <Button marginTop="30px" bg="orange.200" onClick={() => reset()}>
             リセット

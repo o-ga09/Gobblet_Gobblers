@@ -10,39 +10,11 @@ describe('プレゼンターのテスト', () => {
     state.setBoard = displayMock;
 
     const arg = [
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0],
-      [0, 0, 0, 0, 0]
+      [0, 0, 0],
+      [0, 0, 0],
+      [0, 0, 0]
     ];
-    const arg2 = [
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white'
-    ];
+    const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
     const board = new Board(arg, arg2);
     when(displayMock).calledWith(board);
 

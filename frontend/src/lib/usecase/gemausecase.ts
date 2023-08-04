@@ -1,6 +1,9 @@
 import { Board, Koma } from '../domain/entity';
 import { GameOutPutPort } from './port/outputPort';
 
+const BOARD_COLUMN = 3;
+const BOARD_ROW = 3;
+const BOARD = 9;
 export class GameUseCase {
   constructor(readonly gameoutputport: GameOutPutPort) {}
 
@@ -29,14 +32,14 @@ export class GameUseCase {
     const b: number[][] = [] as number[][];
     const bi: string[] = [] as string[];
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < BOARD_COLUMN; i++) {
       b.push([]);
-      for (let j = 0; j < 5; j++) {
+      for (let j = 0; j < BOARD_ROW; j++) {
         b[i].push(0);
       }
     }
 
-    for (let i = 0; i < 25; i++) {
+    for (let i = 0; i < BOARD; i++) {
       bi[i] = '';
     }
 
@@ -45,12 +48,11 @@ export class GameUseCase {
   }
 
   checkVertical(board: Board) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < BOARD_COLUMN; i++) {
       if (
         board.board[0][i] == board.board[1][i] &&
         board.board[1][i] == board.board[2][i] &&
-        board.board[2][i] == board.board[3][i] &&
-        board.board[3][i] == board.board[4][i] &&
+        board.board[2][i] == board.board[0][i] &&
         board.board[0][i] != 0
       ) {
         return true;
@@ -60,12 +62,11 @@ export class GameUseCase {
   }
 
   checkHorizon(board: Board) {
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < BOARD_ROW; i++) {
       if (
         board.board[i][0] == board.board[i][1] &&
         board.board[i][1] == board.board[i][2] &&
-        board.board[i][2] == board.board[i][3] &&
-        board.board[i][3] == board.board[i][4] &&
+        board.board[i][2] == board.board[i][0] &&
         board.board[i][0] != 0
       ) {
         return true;
@@ -78,9 +79,15 @@ export class GameUseCase {
     if (
       board.board[0][0] == board.board[1][1] &&
       board.board[1][1] == board.board[2][2] &&
-      board.board[2][2] == board.board[3][3] &&
-      board.board[3][3] == board.board[4][4] &&
+      board.board[2][2] == board.board[0][0] &&
       board.board[0][0] != 0
+    ) {
+      return true;
+    } else if (
+      board.board[0][2] == board.board[1][1] &&
+      board.board[1][1] == board.board[2][0] &&
+      board.board[0][2] == board.board[2][0] &&
+      board.board[0][2] != 0
     ) {
       return true;
     }
@@ -105,16 +112,12 @@ export class GameUseCase {
   }
 
   convert(index: number): InputData {
-    if (index >= 0 && index <= 4) {
+    if (index >= 0 && index <= 2) {
       return new InputData(0, index);
-    } else if (index >= 5 && index <= 9) {
-      return new InputData(1, index - 5);
-    } else if (index >= 10 && index <= 14) {
-      return new InputData(2, index - 10);
-    } else if (index >= 15 && index <= 19) {
-      return new InputData(3, index - 15);
-    } else if (index >= 20 && index <= 24) {
-      return new InputData(4, index - 20);
+    } else if (index >= 3 && index <= 5) {
+      return new InputData(1, index - 3);
+    } else if (index >= 6 && index <= 8) {
+      return new InputData(2, index - 6);
     } else {
       return new InputData(-1, -1);
     }
