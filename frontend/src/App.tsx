@@ -2,7 +2,6 @@ import {
   Box,
   Button,
   Grid,
-  GridItem,
   Heading,
   Modal,
   ModalBody,
@@ -16,13 +15,16 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { gameState, usecase } from './lib/container';
+import { BoardInfo } from './lib/domain/entity';
+import { KOMA_LARGE_1, KOMA_LARGE_2, KOMA_MEDIUM_1, KOMA_MEDIUM_2, KOMA_SMALL_1, KOMA_SMALL_2 } from './lib/util/const';
 
 function App() {
   const [turn, setTurn] = useState(1);
   const [winner, setWinner] = useState(0);
-  const [, setBoard] = useState<number[][]>([]);
+  const [, setBoard] = useState<BoardInfo[][]>([]);
   const [boardImg, setBoardImg] = useState<string[]>([]);
-  const [koma, setKoma] = useState<string[]>([]);
+  const [selectKoma, setSelectKoma] = useState<string[]>([]);
+  const [komaSize, setKomaSize] = useState(-1);
 
   const [playerImg1, setImg1] = useState('');
   const [playerImg2, setImg2] = useState('');
@@ -39,7 +41,11 @@ function App() {
   }, []);
 
   const tapped = (index: number) => {
-    const koma = usecase.input(index, turn, gameState.board, gameState.boardImg);
+    if(komaSize === -1){
+      alert("コマを選択してください");
+      return;
+    }
+    const koma = usecase.input(index, turn,komaSize, gameState.board, gameState.boardImg);
     if (koma.turn == -1) return;
 
     setBoard(gameState.board);
@@ -57,6 +63,11 @@ function App() {
     } else if (turn === 2) {
       setTurn(1);
     }
+    const targetId = selectKoma.findIndex((k) => k === '選択中');
+    const updatedKoma =[...selectKoma];
+    updatedKoma[targetId] = '済み';
+    setSelectKoma(updatedKoma);
+    setKomaSize(-1);
   };
 
   const reset = () => {
@@ -64,18 +75,43 @@ function App() {
     usecase.init();
     setBoard(gameState.board);
     setBoardImg(gameState.boardImg);
-    setKoma([]);
+    setSelectKoma([]);
   };
 
   const closeModal = () => {
     onClose();
   };
 
-  const selectKoma = (id: number, koma: string[]) => {
-    console.log(koma);
-    koma[id] = '選択中';
-    const newKoma = koma;
-    setKoma(newKoma);
+  const select = (id: number, koma: string[]) => {
+    const updatedKoma = [...koma];
+
+    if(updatedKoma[id] === '' || updatedKoma[id] === undefined) {
+      updatedKoma[id] = '選択中';  
+    } else {
+      updatedKoma[id] = '';
+    }
+
+    switch(id) {
+      case 0:
+        setKomaSize(KOMA_LARGE_1);
+        break;
+      case 1:
+        setKomaSize(KOMA_LARGE_2);
+        break;
+      case 2:
+        setKomaSize(KOMA_MEDIUM_1);
+        break;
+      case 3:
+        setKomaSize(KOMA_MEDIUM_2);
+        break;
+      case 4:
+        setKomaSize(KOMA_SMALL_1);
+        break;
+      case 5:
+        setKomaSize(KOMA_SMALL_2);
+        break;
+    }
+    setSelectKoma(updatedKoma);
   };
 
   return (
@@ -127,9 +163,9 @@ function App() {
                 cursor="pointer"
                 borderRadius="md"
                 boxShadow="md"
-                onClick={() => selectKoma(id, koma)}
+                onClick={() => select(id, selectKoma)}
               >
-                {koma[id]}
+                {selectKoma[id]}
               </Box>
             ))}
           </Grid>
