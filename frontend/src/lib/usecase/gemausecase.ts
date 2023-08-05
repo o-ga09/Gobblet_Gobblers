@@ -1,4 +1,4 @@
-import { Board, Koma } from '../domain/entity';
+import { Board, BoardInfo, Koma } from '../domain/entity';
 import { GameOutPutPort } from './port/outputPort';
 
 const BOARD_COLUMN = 3;
@@ -7,16 +7,17 @@ const BOARD = 9;
 export class GameUseCase {
   constructor(readonly gameoutputport: GameOutPutPort) {}
 
-  input(index: number, turn: number, b: number[][], bi: string[]) {
+  input(index: number, turn: number,size: number, b: BoardInfo[][], bi: string[]) {
     const res = this.convert(index);
-    const koma = new Koma(turn, res.x, res.y);
+    const koma = new Koma(turn, res.x, res.y,size);
     const board = new Board(b, bi);
 
     if (!this.isEmpty(board, koma)) {
-      return new Koma(-1, -1, -1);
+      return new Koma(-1, -1, -1,-1);
     }
 
-    b[koma.x][koma.y] = turn;
+    b[koma.x][koma.y].turn = turn;
+    b[koma.x][koma.y].size = size;
     if (turn === 1) {
       bi[index] = 'red.200';
     } else if (turn === 2) {
@@ -25,17 +26,17 @@ export class GameUseCase {
     const newboard = new Board(b, bi);
     this.gameoutputport.display(newboard);
 
-    return new Koma(1, res.x, res.y);
+    return new Koma(1, res.x, res.y,size);
   }
 
   init() {
-    const b: number[][] = [] as number[][];
+    const b: BoardInfo[][] = [] as BoardInfo[][];
     const bi: string[] = [] as string[];
 
     for (let i = 0; i < BOARD_COLUMN; i++) {
       b.push([]);
       for (let j = 0; j < BOARD_ROW; j++) {
-        b[i].push(0);
+        b[i].push( new BoardInfo(0,-1));
       }
     }
 
@@ -50,10 +51,10 @@ export class GameUseCase {
   checkVertical(board: Board) {
     for (let i = 0; i < BOARD_COLUMN; i++) {
       if (
-        board.board[0][i] == board.board[1][i] &&
-        board.board[1][i] == board.board[2][i] &&
-        board.board[2][i] == board.board[0][i] &&
-        board.board[0][i] != 0
+        board.board[0][i].turn == board.board[1][i].turn &&
+        board.board[1][i].turn == board.board[2][i].turn &&
+        board.board[2][i].turn == board.board[0][i].turn &&
+        board.board[0][i].turn != 0
       ) {
         return true;
       }
@@ -64,10 +65,10 @@ export class GameUseCase {
   checkHorizon(board: Board) {
     for (let i = 0; i < BOARD_ROW; i++) {
       if (
-        board.board[i][0] == board.board[i][1] &&
-        board.board[i][1] == board.board[i][2] &&
-        board.board[i][2] == board.board[i][0] &&
-        board.board[i][0] != 0
+        board.board[i][0].turn == board.board[i][1].turn &&
+        board.board[i][1].turn == board.board[i][2].turn &&
+        board.board[i][2].turn == board.board[i][0].turn &&
+        board.board[i][0].turn != 0
       ) {
         return true;
       }
@@ -77,17 +78,17 @@ export class GameUseCase {
 
   checkCross(board: Board) {
     if (
-      board.board[0][0] == board.board[1][1] &&
-      board.board[1][1] == board.board[2][2] &&
-      board.board[2][2] == board.board[0][0] &&
-      board.board[0][0] != 0
+      board.board[0][0].turn == board.board[1][1].turn &&
+      board.board[1][1].turn == board.board[2][2].turn &&
+      board.board[2][2].turn == board.board[0][0].turn &&
+      board.board[0][0].turn != 0
     ) {
       return true;
     } else if (
-      board.board[0][2] == board.board[1][1] &&
-      board.board[1][1] == board.board[2][0] &&
-      board.board[0][2] == board.board[2][0] &&
-      board.board[0][2] != 0
+      board.board[0][2].turn == board.board[1][1].turn &&
+      board.board[1][1].turn == board.board[2][0].turn &&
+      board.board[0][2].turn == board.board[2][0].turn &&
+      board.board[0][2].turn != 0
     ) {
       return true;
     }
@@ -95,7 +96,7 @@ export class GameUseCase {
     return false;
   }
 
-  isWin(inputBoard: number[][]) {
+  isWin(inputBoard: BoardInfo[][]) {
     const bi: string[] = [];
     const board = new Board(inputBoard, bi);
     if (this.checkVertical(board) || this.checkHorizon(board) || this.checkCross(board)) {
@@ -105,10 +106,12 @@ export class GameUseCase {
   }
 
   isEmpty(board: Board, koma: Koma) {
-    if (board.board[koma.x][koma.y] != 0) {
-      return false;
+    console.log(board.board[koma.x][koma.y].size);
+    console.log(koma.size);
+    if(board.board[koma.x][koma.y].turn !== koma.turn && board.board[koma.x][koma.y].size < koma.size) {
+      return true;
     }
-    return true;
+    return false;
   }
 
   convert(index: number): InputData {

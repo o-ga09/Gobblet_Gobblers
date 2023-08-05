@@ -1,7 +1,7 @@
-import { Board } from '../../lib/domain/entity';
+import { Board, BoardInfo } from '../../lib/domain/entity';
 
 export class GameState {
-  board: number[][] = [];
+  board: BoardInfo[][] = [];
   boardImg: string[] = [];
 
   setBoard(b: Board) {
