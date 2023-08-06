@@ -1,7 +1,8 @@
 export class Board {
   constructor(
     readonly board: BoardInfo[][],
-    readonly boardImg: string[]
+    readonly boardImg: string[],
+    readonly boardIcon: string[]
   ) {}
 }
 

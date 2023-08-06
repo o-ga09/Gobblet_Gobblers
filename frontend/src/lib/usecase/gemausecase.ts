@@ -7,10 +7,10 @@ const BOARD = 9;
 export class GameUseCase {
   constructor(readonly gameoutputport: GameOutPutPort) {}
 
-  input(index: number, turn: number,size: number, b: BoardInfo[][], bi: string[]) {
+  input(index: number, turn: number,size: number, b: BoardInfo[][], bc: string[],bi: string[]) {
     const res = this.convert(index);
     const koma = new Koma(turn, res.x, res.y,size);
-    const board = new Board(b, bi);
+    const board = new Board(b, bc,bi);
 
     if (!this.isEmpty(board, koma)) {
       return new Koma(-1, -1, -1,-1);
@@ -19,11 +19,16 @@ export class GameUseCase {
     b[koma.x][koma.y].turn = turn;
     b[koma.x][koma.y].size = size;
     if (turn === 1) {
-      bi[index] = 'red.200';
+      bc[index] = 'red.200';
     } else if (turn === 2) {
-      bi[index] = 'blue.200';
+      bc[index] = 'blue.200';
     }
-    const newboard = new Board(b, bi);
+
+    if(size === 0 || size === 1) bi[index] = '/Gophersvg.svg';             // SMALL
+    else if(size === 2 || size === 3) bi[index] = '/Gophersvg_yellow.svg'; // MIDIUM
+    else if(size === 4 || size === 5) bi[index] = '/Gophersvg_pink.svg';   // LARGE
+
+    const newboard = new Board(b, bc,bi);
     this.gameoutputport.display(newboard);
 
     return new Koma(1, res.x, res.y,size);
@@ -31,7 +36,8 @@ export class GameUseCase {
 
   init() {
     const b: BoardInfo[][] = [] as BoardInfo[][];
-    const bi: string[] = [] as string[];
+    const bc: string[] = [] as string[];
+    const bi: string[]= [] as string[];
 
     for (let i = 0; i < BOARD_COLUMN; i++) {
       b.push([]);
@@ -41,10 +47,11 @@ export class GameUseCase {
     }
 
     for (let i = 0; i < BOARD; i++) {
+      bc[i] = '';
       bi[i] = '';
     }
 
-    const board = new Board(b, bi);
+    const board = new Board(b, bc,bi);
     this.gameoutputport.display(board);
   }
 
@@ -97,8 +104,9 @@ export class GameUseCase {
   }
 
   isWin(inputBoard: BoardInfo[][]) {
+    const bc: string[] = [];
     const bi: string[] = [];
-    const board = new Board(inputBoard, bi);
+    const board = new Board(inputBoard, bc,bi);
     if (this.checkVertical(board) || this.checkHorizon(board) || this.checkCross(board)) {
       return true;
     }
@@ -106,8 +114,6 @@ export class GameUseCase {
   }
 
   isEmpty(board: Board, koma: Koma) {
-    console.log(board.board[koma.x][koma.y].size);
-    console.log(koma.size);
     if(board.board[koma.x][koma.y].turn !== koma.turn && board.board[koma.x][koma.y].size < koma.size) {
       return true;
     }
