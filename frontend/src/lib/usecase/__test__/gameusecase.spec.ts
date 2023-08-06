@@ -1,5 +1,5 @@
 import { when } from 'jest-when';
-import { Board, Koma } from '../../domain/entity';
+import { Board, BoardInfo, Koma } from '../../domain/entity';
 import { GameUseCase } from '../gemausecase';
 import { GameOutPutPort } from '../port/outputPort';
 
@@ -12,13 +12,14 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0]
+      [new BoardInfo(0,-1),new BoardInfo(0,-1),new BoardInfo(0,-1)],
+      [new BoardInfo(0,-1),new BoardInfo(0,-1),new BoardInfo(0,-1)],
+      [new BoardInfo(0,-1),new BoardInfo(0,-1),new BoardInfo(0,-1)]
     ];
     const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
-    const actual = usecase.input(1, 1, arg1, arg2);
-    const expected = new Koma(1, 0, 1);
+    const arg3 = ['', '', '', '', '', '', '', '', ''];
+    const actual = usecase.input(1, 1,1, arg1, arg2,arg3);
+    const expected = new Koma(1, 0, 1,1);
     expect(actual).toEqual(expected);
   });
 
@@ -41,12 +42,13 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [1, 0, 0],
-      [1, 0, 0],
-      [1, 0, 0]
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)]
     ];
     const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
-    const board = new Board(arg1, arg2);
+    const arg3 = ['', '', '', '', '', '', '', '', ''];
+    const board = new Board(arg1, arg2,arg3);
     const actual = usecase.checkVertical(board);
     const expected = true;
     expect(actual).toEqual(expected);
@@ -60,38 +62,13 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [1, 1, 1],
-      [0, 0, 0],
-      [0, 0, 0]
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)]
     ];
-    const arg2 = [
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white',
-      'white'
-    ];
-    const board = new Board(arg1, arg2);
+    const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
+    const arg3 = ['', '', '', '', '', '', '', '', ''];
+    const board = new Board(arg1, arg2,arg3);
     const actual = usecase.checkHorizon(board);
     const expected = true;
     expect(actual).toEqual(expected);
@@ -105,14 +82,13 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [1, 0, 0, 0, 0],
-      [0, 1, 0, 0, 0],
-      [0, 0, 1, 0, 0],
-      [0, 0, 0, 1, 0],
-      [0, 0, 0, 0, 1]
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)]
     ];
     const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
-    const board = new Board(arg1, arg2);
+    const arg3 = ['', '', '', '', '', '', '', '', ''];
+    const board = new Board(arg1, arg2,arg3);
     const actual = usecase.checkCross(board);
     const expected = true;
     expect(actual).toEqual(expected);
@@ -125,12 +101,12 @@ describe('ユースケースのテスト', () => {
     when(displayMock).calledWith().mockReturnValueOnce(null);
     const usecase = new GameUseCase(outputport);
 
-    const arg = [
-      [1, 0, 0],
-      [1, 0, 0],
-      [1, 0, 0]
+    const arg1 = [
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)]
     ];
-    const actual = usecase.isWin(arg);
+    const actual = usecase.isWin(arg1);
     const expected = true;
     expect(actual).toEqual(expected);
   });
@@ -143,13 +119,14 @@ describe('ユースケースのテスト', () => {
     const usecase = new GameUseCase(outputport);
 
     const arg1 = [
-      [1, 1, 1],
-      [1, 1, 1],
-      [1, 1, 1]
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)],
+      [new BoardInfo(1,1),new BoardInfo(1,1),new BoardInfo(1,1)]
     ];
     const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
-    const board = new Board(arg1, arg2);
-    const koma = new Koma(1, 1, 1);
+    const arg3 = ['', '', '', '', '', '', '', '', ''];
+    const board = new Board(arg1, arg2,arg3);
+    const koma = new Koma(1, 1, 1,1);
     const actual = usecase.isEmpty(board, koma);
     const expected = false;
     expect(actual).toEqual(expected);
