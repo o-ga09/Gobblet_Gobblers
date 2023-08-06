@@ -32,6 +32,8 @@ function App() {
   const [, setImg2] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const title = 'ゴブレットゴブラーズ'
+
   useEffect(() => {
     (() => {
       usecase.init();
@@ -132,7 +134,7 @@ function App() {
   return (
     <Box p={4}>
       <Heading mb={4} textAlign="center">
-        五目並べ
+        {title}
       </Heading>
       <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center">
         <h1>{turn} のターン</h1>
