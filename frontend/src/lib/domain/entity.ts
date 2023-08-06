@@ -1,7 +1,8 @@
 export class Board {
   constructor(
-    readonly board: number[][],
-    readonly boardImg: string[]
+    readonly board: BoardInfo[][],
+    readonly boardImg: string[],
+    readonly boardIcon: string[]
   ) {}
 }
 
@@ -9,6 +10,19 @@ export class Koma {
   constructor(
     readonly turn: number,
     readonly x: number,
-    readonly y: number
+    readonly y: number,
+    readonly size: number,
   ) {}
+}
+
+export class BoardInfo {
+  size: number;
+  turn: number;
+  constructor(
+    turn: number,
+    size: number,
+  ) {
+    this.size = size;
+    this.turn = turn;
+  }
 }

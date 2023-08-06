@@ -1,6 +1,6 @@
 import { when } from 'jest-when';
 import { GameState } from '../../../view/state/gamestate';
-import { Board } from '../../domain/entity';
+import { Board, BoardInfo } from '../../domain/entity';
 import { GamePresenter } from '../gamepresenter';
 
 describe('プレゼンターのテスト', () => {
@@ -10,12 +10,13 @@ describe('プレゼンターのテスト', () => {
     state.setBoard = displayMock;
 
     const arg = [
-      [0, 0, 0],
-      [0, 0, 0],
-      [0, 0, 0]
+      [new BoardInfo(0,0),new BoardInfo(0,0),new BoardInfo(0,0)],
+      [new BoardInfo(0,0),new BoardInfo(0,0),new BoardInfo(0,0)],
+      [new BoardInfo(0,0),new BoardInfo(0,0),new BoardInfo(0,0)]
     ];
     const arg2 = ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white'];
-    const board = new Board(arg, arg2);
+    const arg3 = ['', '', '', '', '', '', '', '', ''];
+    const board = new Board(arg, arg2,arg3);
     when(displayMock).calledWith(board);
 
     const presenter = new GamePresenter(state);
