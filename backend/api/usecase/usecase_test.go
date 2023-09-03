@@ -94,7 +94,8 @@ func TestIsWin(t *testing.T) {
 
 	t.Run("コマを置けるか判定する",func(t *testing.T) {
 		service.Init()
-		res:= service.IsEmpty(0,0)
+		koma := domain.Koma{X: 1,Y: 1,Size: 2,Turn: 1}
+		res:= service.IsEmpty(koma)
 		assert.Equal(t,res,true)
 	})
 

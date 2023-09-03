@@ -32,8 +32,8 @@ func(g *GameService) IsWin() bool {
 	return false
 }
 
-func(g *GameService) IsEmpty(x,y int) bool {
-	return g.Board.BoardInfo[x][y].Turn == EMPTY
+func(g *GameService) IsEmpty(koma domain.Koma) bool {
+	return g.Board.BoardInfo[koma.X][koma.Y].Turn != koma.Turn && g.Board.BoardInfo[koma.X][koma.Y].Size < koma.Size
 }
 
 func(g *GameService) CheckCross() bool {
@@ -72,7 +72,7 @@ func(g *GameService) Input(koma domain.Koma) (domain.Koma, error) {
 		return domain.Koma{}, fmt.Errorf("out range index: %d,%d",koma.X,koma.Y)
 	}
 
-	if !g.IsEmpty(koma.X,koma.Y) {
+	if !g.IsEmpty(koma) {
 		return  domain.Koma{}, fmt.Errorf("DRAW")
 	}
 
