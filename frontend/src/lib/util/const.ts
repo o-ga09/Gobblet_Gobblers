@@ -5,6 +5,7 @@ export const KOMA_MEDIUM_2 = 2;
 export const KOMA_SMALL_1 = 1;
 export const KOMA_SMALL_2 = 0;
 
+// PNG画像にして、大・中・小
 export const pch_List = [
     'Gophersvg_pink.svg',
     'Gophersvg_pink.svg',

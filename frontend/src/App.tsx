@@ -16,7 +16,15 @@ import {
 import { useEffect, useState } from 'react';
 import { gameState, usecase } from './lib/container';
 import { BoardInfo } from './lib/domain/entity';
-import { KOMA_LARGE_1, KOMA_LARGE_2, KOMA_MEDIUM_1, KOMA_MEDIUM_2, KOMA_SMALL_1, KOMA_SMALL_2, pch_List } from './lib/util/const';
+import {
+  KOMA_LARGE_1,
+  KOMA_LARGE_2,
+  KOMA_MEDIUM_1,
+  KOMA_MEDIUM_2,
+  KOMA_SMALL_1,
+  KOMA_SMALL_2,
+  pch_List
+} from './lib/util/const';
 
 function App() {
   const [turn, setTurn] = useState(1);
@@ -32,7 +40,7 @@ function App() {
   const [, setImg2] = useState('');
   const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const title = 'ゴブレットゴブラーズ'
+  const title = 'ゴブレットゴブラーズ';
 
   useEffect(() => {
     (() => {
@@ -46,11 +54,11 @@ function App() {
   }, []);
 
   const tapped = (index: number) => {
-    if(komaSize === -1){
-      alert("コマを選択してください");
+    if (komaSize === -1) {
+      alert('コマを選択してください');
       return;
     }
-    const koma = usecase.input(index, turn,komaSize, gameState.board, gameState.boardImg,gameState.boardIcon);
+    const koma = usecase.input(index, turn, komaSize, gameState.board, gameState.boardImg, gameState.boardIcon);
     if (koma.turn == -1) return;
 
     setBoard(gameState.board);
@@ -68,7 +76,8 @@ function App() {
     } else if (turn === 2) {
       setTurn(1);
     }
-    const targetId = turn === 1 ? selectKoma_P1.findIndex((k) => k === '選択中') : selectKoma_P2.findIndex((k) => k === '選択中') ;
+    const targetId =
+      turn === 1 ? selectKoma_P1.findIndex((k) => k === '選択中') : selectKoma_P2.findIndex((k) => k === '選択中');
     const updatedKoma = turn === 1 ? [...selectKoma_P1] : [...selectKoma_P2];
     updatedKoma[targetId] = '済み';
     turn === 1 ? setSelectKomaP1(updatedKoma) : setSelectKomaP2(updatedKoma);
@@ -90,19 +99,20 @@ function App() {
 
   const select = (id: number, koma: string[]) => {
     const updatedKoma = [...koma];
-    const targetId = turn === 1 ? selectKoma_P1.findIndex((k) => k === '選択中') : selectKoma_P2.findIndex((k) => k === '選択中');
-    
-    if(targetId !== -1) {
+    const targetId =
+      turn === 1 ? selectKoma_P1.findIndex((k) => k === '選択中') : selectKoma_P2.findIndex((k) => k === '選択中');
+
+    if (targetId !== -1) {
       updatedKoma[targetId] = '';
     }
 
-    if(updatedKoma[id] === '' || updatedKoma[id] === undefined) {
-      updatedKoma[id] = '選択中';  
+    if (updatedKoma[id] === '' || updatedKoma[id] === undefined) {
+      updatedKoma[id] = '選択中';
     } else {
       updatedKoma[id] = '';
     }
 
-    switch(id) {
+    switch (id) {
       case 0:
         setKomaSize(KOMA_LARGE_1);
         turn === 1 ? setImg1('/Gophersvg_pink.svg') : setImg2('/Gophersvg_pink.svg');
@@ -116,7 +126,7 @@ function App() {
         setKomaSize(KOMA_MEDIUM_1);
         break;
       case 3:
-        turn === 1 ? setImg1('/Gophersvg_yellow.svg') : setImg2('/Gophersvg_yellow.svg')
+        turn === 1 ? setImg1('/Gophersvg_yellow.svg') : setImg2('/Gophersvg_yellow.svg');
         setKomaSize(KOMA_MEDIUM_2);
         break;
       case 4:
@@ -157,6 +167,7 @@ function App() {
               {boardImg[rowIndex] === '' ? (
                 <></>
               ) : (
+                // 盤面
                 <img
                   src={boardIcon[rowIndex]} // 画像のURL
                   alt="Sample Image" // 画像の代替テキスト
@@ -171,12 +182,12 @@ function App() {
         <Box w="700px" display="flex" justifyContent="center">
           <Grid templateColumns="repeat(6, 1fr)" gap={1} marginTop="30px">
             {[...Array(6)].map((_, id) => (
-              <Box 
-                key={id} 
-                position='relative' 
-                w="80px" 
+              <Box
+                key={id}
+                position="relative"
+                w="80px"
                 h="80px"
-                onClick={() => turn === 1 ? select(id, selectKoma_P1) : select(id, selectKoma_P2)}
+                onClick={() => (turn === 1 ? select(id, selectKoma_P1) : select(id, selectKoma_P2))}
               >
                 <Box
                   position="absolute"
@@ -189,34 +200,25 @@ function App() {
                   cursor="pointer"
                   borderRadius="md"
                   boxShadow="md"
-                  textAlign='center'
+                  textAlign="center"
                   zIndex={0}
                 />
 
-                <Box
-                  position="absolute"
-                  top="0"
-                  left="0"
-                  w="100%"
-                  h="80%"
-                  zIndex={1}
-                >
-                  {
-                    turn === 1 && selectKoma_P1[id] === '済み' ? (
-                      <></>
-                    ) : turn === 2 && selectKoma_P2[id] === '済み' ? 
-                    (
-                      <></>
-                    ) :
-                    (
-                      <img
-                        src={pch_List[id]} // 画像のURL
-                        alt="Sample Image" // 画像の代替テキスト
-                        width="80%" // 画像の幅（ボックスに合わせて100%にする）
-                        height="80%" // 画像の高さ（ボックスに合わせて100%にする）
-                      />
-                    )
-                  }
+                <Box position="absolute" top="0" left="0" w="100%" h="80%" zIndex={1}>
+                  {turn === 1 && selectKoma_P1[id] === '済み' ? (
+                    <></>
+                  ) : turn === 2 && selectKoma_P2[id] === '済み' ? (
+                    <></>
+                  ) : (
+                    <img
+                      // TODO: ここを変更する
+                      // 選択肢
+                      src={pch_List[id]} // 画像のURL
+                      alt="Sample Image" // 画像の代替テキスト
+                      width="80%" // 画像の幅（ボックスに合わせて100%にする）
+                      height="80%" // 画像の高さ（ボックスに合わせて100%にする）
+                    />
+                  )}
                 </Box>
               </Box>
             ))}
@@ -226,18 +228,11 @@ function App() {
                 h="40px"
                 w="80px"
                 border="1px solid #ccc"
-                bg='teal.200'
-                fontWeight='bold'
-                textAlign='center'
+                bg="teal.200"
+                fontWeight="bold"
+                textAlign="center"
               >
-                {
-                  turn === 1 ? (
-                    selectKoma_P1[id]
-                  ) : 
-                  (
-                    selectKoma_P2[id]
-                  )
-                }
+                {turn === 1 ? selectKoma_P1[id] : selectKoma_P2[id]}
               </Box>
             ))}
           </Grid>
