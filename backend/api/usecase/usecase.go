@@ -15,6 +15,23 @@ const (
 	EMPTY = 0
 )
 
+func ProvideGameService() *GameService {
+	return &GameService{}
+}
+
+func(g *GameService) GameMain(koma domain.Koma) (*domain.GameResponse, error) {
+	res := domain.GameResponse{
+		X: 1,
+		Y: 1,
+		Turn: 1,
+		Size: 1,
+		IsFinished: false,
+		IsDraw: false,
+		Next_Turn: 2,
+	}
+	return &res, nil
+}
+
 func(g *GameService) Init() {
 	board := make([][]domain.BoardInfo,3)
 	for i := 0; i < 3; i++ {

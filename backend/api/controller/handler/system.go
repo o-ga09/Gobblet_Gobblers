@@ -13,3 +13,7 @@ func(s *HelloServer) Greetserver(ctx context.Context, req *hellopb.HelloRequest)
 	res := hellopb.HelloResponse{Msg: "Hello " + req.Msg + " !"}
 	return &res, nil
 }
+
+func ProvideHealthCheckService() *HelloServer {
+	return &HelloServer{}
+}

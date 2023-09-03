@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"log"
+	di "main/api/DI"
 	"main/api/controller/handler"
 	hellopb "main/pkg/grpc"
 	"net"
@@ -13,10 +14,6 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-func NewServer() *handler.HelloServer {
-	return &handler.HelloServer{}
-}
-
 func Run() {
 	port := 8080
 	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
@@ -26,7 +23,8 @@ func Run() {
 
 	server := grpc.NewServer()
 
-	hellopb.RegisterHellogRPCServiceServer(server,NewServer())
+	hellopb.RegisterHellogRPCServiceServer(server,handler.ProvideHealthCheckService())
+	hellopb.RegisterGameServiceServer(server,di.DIcontainer())
 
 	reflection.Register(server)
 
