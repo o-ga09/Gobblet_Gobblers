@@ -2,69 +2,30 @@
 syntax = "proto3";
 
 // protoファイルから自動生成させるGoのコードの置き先
-// (詳細は4章にて)
 option go_package = "pkg/grpc";
 
-import "google/protobuf/empty.proto";
-
 // packageの宣言
-package game;
+package Game;
 
 // サービスの定義
 service GameService {
 	// サービスが持つメソッドの定義
-	//サーバヘルスチェック用
-	rpc Greetserver(GreetRequest) returns (GreetResponse);
-
-	//ルームを追加
-	rpc AddRoom(RoomRequest) returns (RoomInfo);
-
-	//ルームに参加
-	rpc JoinRoom(RoomRequest) returns (RoomInfo);
-
-	//指定したルーム情報を取得
-	rpc GetRoomInfo(RoomRequest) returns (RoomInfo);
-
-	//ルーム情報一覧を取得
-	rpc GetRooms(google.protobuf.Empty) returns (RoomList);
-
-	//ゲームメイン通信用
-	rpc TicTacToeGame(stream GameRequest) returns (stream GameResponse);
+	// ゲームメインメソッド
+	// rpc TicTacToeGame(stream GameRequest) returns (stream GameResponse);
+	rpc TicTacToeGame(GameRequest) returns (GameResponse);
 }
 
 // 型の定義
 message GameRequest {
-	string room_id = 1;
-	string playername = 2;
-	int32 x = 3;
-	int32 y = 4;
+	int32 x = 1;
+	int32 y = 2;
+	int32 size = 3;
+	int32 turn = 4; 
 }
 
 message GameResponse {
-	string playerName = 1;
-	int32 x = 2;
-	int32 y = 3;
-	bool attack = 4;
-}
-
-message GreetRequest {
-	string msg = 1;
-}
-
-message GreetResponse {
-	string msg = 1;
-}
-
-message RoomRequest {
-	string room_id = 1;
-}
-
-message RoomInfo {
-	string room_id = 1;
-	int32 playername = 2;
-	bool attack = 3;
-}
-
-message RoomList {
-	repeated RoomInfo room = 1;
+	int32 x = 1;
+	int32 y = 2;
+	int32 size = 3;
+	int32 turn = 4; 
 }
