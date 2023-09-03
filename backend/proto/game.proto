@@ -27,5 +27,8 @@ message GameResponse {
 	int32 x = 1;
 	int32 y = 2;
 	int32 size = 3;
-	int32 turn = 4; 
+	int32 turn = 4;
+	bool isFinished = 5;
+	bool isDraw = 6;
+	int32 next_turn = 7;
 }

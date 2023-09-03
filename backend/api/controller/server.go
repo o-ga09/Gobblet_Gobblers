@@ -3,6 +3,7 @@ package api
 import (
 	"fmt"
 	"log"
+	di "main/api/DI"
 	"main/api/controller/handler"
 	hellopb "main/pkg/grpc"
 	"net"
@@ -23,7 +24,7 @@ func Run() {
 	server := grpc.NewServer()
 
 	hellopb.RegisterHellogRPCServiceServer(server,handler.ProvideHealthCheckService())
-	hellopb.RegisterGameServiceServer(server,handler.ProvideGameService())
+	hellopb.RegisterGameServiceServer(server,di.DIcontainer())
 
 	reflection.Register(server)
 
