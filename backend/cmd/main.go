@@ -23,36 +23,38 @@ func main() {
 	for {
 		switch now_TURN {
 		case TURN1:
-			fmt.Println("Player 1 Input number koma position [x, y]")
+			fmt.Println("Player 1 Input number koma position [x, y, size]")
 			fmt.Fscan(os.Stdin,&input_str)
 			args := strings.Split(input_str, ",")
-			if len(args) != 2 {
+			if len(args) != 3 {
 				fmt.Println(args)
 				os.Exit(1)
 			}
 			x, _ := strconv.Atoi(args[0])
 			y, _ := strconv.Atoi(args[1])
-			if !service.IsEmpty(x,y) {
+			size, _ := strconv.Atoi(args[2])
+			koma := domain.Koma{X: x,Y: y,Size: size,Turn: now_TURN}
+			if !service.IsEmpty(koma) {
 				fmt.Println("Input another positon")
 				continue
 			}
-			koma := domain.Koma{X: x,Y: y,Size: 1,Turn: now_TURN}
 			res, _ := service.Input(koma)
 			now_TURN =res.Turn
 		case TURN2:
 			fmt.Println("Player 2 Input number koma position [x, y]")
 			fmt.Fscan(os.Stdin,&input_str)
 			args := strings.Split(input_str, ",")
-			if len(args) != 2 {
+			if len(args) != 3 {
 				os.Exit(1)
 			}
 			x, _ := strconv.Atoi(args[0])
 			y, _ := strconv.Atoi(args[1])
-			if !service.IsEmpty(x,y) {
+			size, _ := strconv.Atoi(args[2])
+			koma := domain.Koma{X: x,Y: y,Size: size,Turn: now_TURN}
+			if !service.IsEmpty(koma) {
 				fmt.Println("Input another positon")
 				continue
 			}
-			koma := domain.Koma{X: x,Y: y,Size: 1,Turn: now_TURN}
 			res, _ := service.Input(koma)
 			now_TURN =res.Turn
 		}
