@@ -2,39 +2,68 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"main/api"
-	"net"
+	"main/api/domain"
+	"main/api/usecase"
 	"os"
-	"os/signal"
+	"strconv"
+	"strings"
+)
 
-	hellopb "main/pkg/grpc"
-
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
+const (
+	TURN1 = 1 //先攻
+	TURN2 = 2 //後攻
 )
 
 func main() {
-	port := 8080
-	l, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
-	if err != nil {
-		log.Fatal(err)
+	service := usecase.GameService{}
+	service.Init()
+
+	var input_str string
+	now_TURN := 1
+	for {
+		switch now_TURN {
+		case TURN1:
+			fmt.Println("Player 1 Input number koma position [x, y]")
+			fmt.Fscan(os.Stdin,&input_str)
+			args := strings.Split(input_str, ",")
+			if len(args) != 2 {
+				fmt.Println(args)
+				os.Exit(1)
+			}
+			x, _ := strconv.Atoi(args[0])
+			y, _ := strconv.Atoi(args[1])
+			if !service.IsEmpty(x,y) {
+				fmt.Println("Input another positon")
+				continue
+			}
+			koma := domain.Koma{X: x,Y: y,Size: 1,Turn: now_TURN}
+			res, _ := service.Input(koma)
+			now_TURN =res.Turn
+		case TURN2:
+			fmt.Println("Player 2 Input number koma position [x, y]")
+			fmt.Fscan(os.Stdin,&input_str)
+			args := strings.Split(input_str, ",")
+			if len(args) != 2 {
+				os.Exit(1)
+			}
+			x, _ := strconv.Atoi(args[0])
+			y, _ := strconv.Atoi(args[1])
+			if !service.IsEmpty(x,y) {
+				fmt.Println("Input another positon")
+				continue
+			}
+			koma := domain.Koma{X: x,Y: y,Size: 1,Turn: now_TURN}
+			res, _ := service.Input(koma)
+			now_TURN =res.Turn
+		}
+
+		for i := 0; i < 3; i++ {
+			for j := 0; j < 3; j++ {
+				fmt.Printf("%d",service.Board.BoardInfo[i][j].Turn)
+			}
+			fmt.Printf("\n")
+		}
+
+		if service.IsWin() {break}
 	}
-
-	server := grpc.NewServer()
-
-	hellopb.RegisterHellogRPCServiceServer(server,api.NewServer())
-
-	reflection.Register(server)
-
-	go func() {
-		log.Printf("server is started port %d\n", port)
-		server.Serve(l)
-	} ()
-
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit,os.Interrupt)
-	<- quit
-	log.Printf("stopping server ...\n")
-	server.GracefulStop()
 }

@@ -62,7 +62,7 @@ func(g *GameService) CheckVertical() bool {
 			return true
 		}
 	}
-	fmt.Println(g.Board.BoardInfo)
+	
 	return false
 }
 

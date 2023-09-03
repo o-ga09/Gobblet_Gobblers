@@ -1,4 +1,4 @@
-package api
+package handler
 
 import (
 	"context"
@@ -12,8 +12,4 @@ type HelloServer struct {
 func(s *HelloServer) Greetserver(ctx context.Context, req *hellopb.HelloRequest) (*hellopb.HelloResponse, error) {
 	res := hellopb.HelloResponse{Msg: "Hello " + req.Msg + " !"}
 	return &res, nil
-}
-
-func NewServer() *HelloServer {
-	return &HelloServer{}
 }
