@@ -48,8 +48,6 @@ function App() {
       setBoard(gameState.board);
       setBoardImg(gameState.boardImg);
       setBoardIcon(gameState.boardIcon);
-      setImg1('/stamp.png');
-      setImg2('/beer.png');
     })();
   }, []);
 
